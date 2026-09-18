@@ -1,0 +1,16 @@
+body {
+    font-family: Arial;
+    max-width: 800px;
+    margin: 40px auto;
+}
+
+button {
+    padding: 10px 20px;
+    cursor: pointer;
+}
+
+#foodList div {
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-top: 10px;
+}

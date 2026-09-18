@@ -1,4 +1,4 @@
-package com.herbalance.herbalance;
+package com.herbalance;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
