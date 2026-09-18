@@ -1,16 +1,286 @@
-body {
-    font-family: Arial;
-    max-width: 800px;
-    margin: 40px auto;
+* {
+    box-sizing: border-box;
 }
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #fff8fa;
+    color: #3f3540;
+}
+
+
+/* NAVBAR */
+
+nav {
+    height: 75px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 8%;
+
+    background: white;
+
+    border-bottom: 1px solid #f4dce4;
+}
+
+
+.logo {
+    font-size: 22px;
+    font-weight: bold;
+
+    color: #d66b91;
+}
+
+
+.nav-links {
+    display: flex;
+    gap: 30px;
+}
+
+
+.nav-links a {
+    text-decoration: none;
+
+    color: #776a70;
+
+    font-size: 14px;
+}
+
+
+.nav-links a:hover {
+    color: #d66b91;
+}
+
+
+/* MAIN */
+
+main {
+    max-width: 1000px;
+
+    margin: auto;
+
+    padding: 60px 25px;
+}
+
+
+/* WELCOME */
+
+.welcome {
+    margin-bottom: 40px;
+}
+
+
+.date,
+.small-title {
+    color: #d66b91;
+
+    font-size: 12px;
+
+    font-weight: bold;
+
+    letter-spacing: 2px;
+}
+
+
+.welcome h1 {
+    font-size: 46px;
+
+    margin: 8px 0;
+
+    color: #44343d;
+}
+
+
+.welcome > p:last-child {
+    color: #85777d;
+
+    max-width: 500px;
+
+    line-height: 1.6;
+}
+
+
+/* DASHBOARD */
+
+.dashboard {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 20px;
+
+    margin-bottom: 60px;
+}
+
+
+.card {
+    background: white;
+
+    border: 1px solid #f1dce4;
+
+    border-radius: 22px;
+
+    padding: 25px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 20px;
+
+    box-shadow: 0 8px 25px rgba(180, 100, 130, 0.07);
+}
+
+
+.icon {
+    font-size: 35px;
+}
+
+
+.card p {
+    margin: 0 0 8px;
+
+    color: #9b858e;
+
+    font-size: 13px;
+}
+
+
+.card h2 {
+    margin: 0;
+
+    font-size: 20px;
+}
+
+
+.card h2 span {
+    color: #bbaab1;
+
+    font-size: 13px;
+
+    font-weight: normal;
+}
+
+
+/* FOOD */
+
+.food-section {
+    background: white;
+
+    padding: 35px;
+
+    border-radius: 25px;
+
+    border: 1px solid #f1dce4;
+}
+
+
+.section-title {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 25px;
+}
+
+
+.section-title h2 {
+    margin: 5px 0;
+
+    font-size: 28px;
+}
+
+
+/* BUTTON */
 
 button {
-    padding: 10px 20px;
+    border: none;
+
+    background: #e98bab;
+
+    color: white;
+
+    padding: 13px 22px;
+
+    border-radius: 20px;
+
+    font-size: 14px;
+
     cursor: pointer;
+
+    transition: 0.2s;
 }
 
-#foodList div {
-    border: 1px solid #ddd;
-    padding: 15px;
-    margin-top: 10px;
+
+button:hover {
+    background: #d66b91;
+
+    transform: translateY(-2px);
+}
+
+
+/* FOOD CARDS */
+
+.food-grid {
+    display: grid;
+
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+
+    gap: 15px;
+}
+
+
+.food-grid div {
+    background: #fff7fa;
+
+    border: 1px solid #f3dce5;
+
+    border-radius: 18px;
+
+    padding: 20px;
+}
+
+
+.food-grid h3 {
+    margin-top: 0;
+
+    color: #c75f85;
+}
+
+
+.food-grid p {
+    margin: 7px 0;
+
+    color: #776a70;
+
+    font-size: 14px;
+}
+
+
+/* MOBILE */
+
+@media (max-width: 650px) {
+
+    .nav-links {
+        display: none;
+    }
+
+    .dashboard {
+        grid-template-columns: 1fr;
+    }
+
+    .welcome h1 {
+        font-size: 36px;
+    }
+
+    .section-title {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 15px;
+    }
 }
