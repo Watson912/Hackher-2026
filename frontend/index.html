@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>HerBalance</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<nav>
+    <div class="logo">
+        🌷 HerBalance
+    </div>
+
+    <div class="nav-links">
+        <a href="#">Today</a>
+        <a href="#">Food</a>
+        <a href="#">Mood</a>
+        <a href="#">Progress</a>
+    </div>
+</nav>
+
+
+<main>
+
+    <section class="welcome">
+
+        <p class="date">YOUR WELLNESS SPACE</p>
+
+        <h1>Good morning ♡</h1>
+
+        <p>
+            Nourish your body, understand your mind,
+            and celebrate the little wins.
+        </p>
+
+    </section>
+
+
+    <section class="dashboard">
+
+        <div class="card calories">
+
+            <span class="icon">🍓</span>
+
+            <div>
+                <p>Today's calories</p>
+                <h2>0 <span>/ 1,800 kcal</span></h2>
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <span class="icon">🌸</span>
+
+            <div>
+                <p>Today's mood</p>
+                <h2>How are you feeling?</h2>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <section class="food-section">
+
+        <div class="section-title">
+
+            <div>
+                <p class="small-title">NOURISH YOUR BODY</p>
+                <h2>Food Database</h2>
+            </div>
+
+            <button onclick="loadFoods()">
+                Load Foods ♡
+            </button>
+
+        </div>
+
+
+        <!-- JavaScript puts foods here -->
+        <div id="foodList" class="food-grid"></div>
+
+    </section>
+
+</main>
+
+
+<script src="app.js"></script>
+
+</body>
+</html>
