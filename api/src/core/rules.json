@@ -2,53 +2,67 @@
   "textbook": {
     "description": "What research says the average cycle looks like. Energy is lowest on her period, peaks around ovulation, holds up through week 3, then dips before the next period. The learning layer compares her logs against these numbers. Keep in sync with database/README.md and healthher_03_queries.sql section 7.",
     "weeks": {
-      "1": { "expectedEnergy": 3.0, "label": "Period week" },
-      "2": { "expectedEnergy": 4.5, "label": "Building to ovulation" },
-      "3": { "expectedEnergy": 4.0, "label": "Ovulation into early luteal" },
-      "4": { "expectedEnergy": 2.5, "label": "Late luteal" }
+      "1": {
+        "expectedEnergy": 3,
+        "label": "Period week"
+      },
+      "2": {
+        "expectedEnergy": 4.5,
+        "label": "Building to ovulation"
+      },
+      "3": {
+        "expectedEnergy": 4,
+        "label": "Ovulation into early luteal"
+      },
+      "4": {
+        "expectedEnergy": 2.5,
+        "label": "Late luteal"
+      }
     }
   },
-
   "phases": {
     "MENSTRUAL": {
-      "intensityModifier": 0.80,
+      "intensityModifier": 0.8,
       "volumeModifier": 0.75,
       "nutrition": "Iron-rich foods (red meat, lentils, spinach) to offset menstrual losses. Anti-inflammatory fats. Do not cut calories this week."
     },
     "FOLLICULAR": {
-      "intensityModifier": 1.00,
+      "intensityModifier": 1,
       "volumeModifier": 1.05,
       "nutrition": "Carb tolerance is highest now. Push carbs around training and add volume to protein. Best week to attempt progressive overload."
     },
     "OVULATORY": {
-      "intensityModifier": 1.10,
-      "volumeModifier": 1.00,
+      "intensityModifier": 1.1,
+      "volumeModifier": 1,
       "nutrition": "Peak strength window. Keep hydration and electrolytes up, ligaments are laxer so warm up longer before heavy lifts."
     },
     "LUTEAL": {
-      "intensityModifier": 0.90,
-      "volumeModifier": 0.90,
+      "intensityModifier": 0.9,
+      "volumeModifier": 0.9,
       "nutrition": "Metabolism runs slightly hotter, add roughly 100-200 kcal. Magnesium and complex carbs help with cravings and sleep."
     },
+    "LUTEAL_LATE": {
+      "intensityModifier": 0.75,
+      "volumeModifier": 0.7,
+      "nutrition": "Late luteal deload. Protein high, salt moderate to limit bloating. Expect lower energy, this is planned, not a setback."
+    },
     "SUPPRESSED": {
-      "intensityModifier": 1.00,
-      "volumeModifier": 1.00,
+      "intensityModifier": 0.95,
+      "volumeModifier": 1,
       "nutrition": "Hormonal birth control keeps hormones steady, so training stays consistent week to week. Keep protein high and fuel sessions evenly."
     },
     "UNKNOWN": {
-      "intensityModifier": 1.00,
-      "volumeModifier": 1.00,
+      "intensityModifier": 0.95,
+      "volumeModifier": 1,
       "nutrition": "Log your next period start so the plan can adapt to your cycle."
     }
   },
-
   "expectedEffort": {
     "description": "RPE (1-10) a session at this intensity should feel like.",
     "LOW": 4,
     "MODERATE": 6,
     "HIGH": 8
   },
-
   "learning": {
     "description": "See PLAN.md, Learning layer. Only energy moves the plan.",
     "threshold": 0.5,
@@ -56,5 +70,157 @@
     "maxAdjustment": 0.2,
     "minSessions": 3,
     "fullConfidenceSessions": 6
+  },
+  "intensityThresholds": {
+    "description": "Final modifier (phase + personal adjustment) to intensity bucket.",
+    "HIGH": 0.98,
+    "MODERATE": 0.85
+  },
+  "trainingDays": {
+    "1": [
+      0
+    ],
+    "2": [
+      0,
+      3
+    ],
+    "3": [
+      0,
+      2,
+      4
+    ],
+    "4": [
+      0,
+      2,
+      3,
+      5
+    ],
+    "5": [
+      0,
+      1,
+      3,
+      4,
+      5
+    ],
+    "6": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "7": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "description": "Day offsets within the 7-day block, by training days per week."
+  },
+  "goalTemplates": {
+    "description": "Slot for the Nth training day of the week, by goal.",
+    "STRENGTH": [
+      "STRENGTH",
+      "CARDIO",
+      "STRENGTH",
+      "STRENGTH",
+      "CARDIO",
+      "STRENGTH",
+      "MOBILITY"
+    ],
+    "MUSCLE_GAIN": [
+      "STRENGTH",
+      "STRENGTH",
+      "CARDIO",
+      "STRENGTH",
+      "STRENGTH",
+      "CARDIO",
+      "MOBILITY"
+    ],
+    "ENDURANCE": [
+      "CARDIO",
+      "CARDIO",
+      "STRENGTH",
+      "CARDIO",
+      "CARDIO",
+      "STRENGTH",
+      "MOBILITY"
+    ],
+    "FAT_LOSS": [
+      "CARDIO",
+      "STRENGTH",
+      "CARDIO",
+      "STRENGTH",
+      "CARDIO",
+      "STRENGTH",
+      "MOBILITY"
+    ],
+    "GENERAL_FITNESS": [
+      "STRENGTH",
+      "CARDIO",
+      "MOBILITY",
+      "STRENGTH",
+      "CARDIO",
+      "STRENGTH",
+      "CARDIO"
+    ]
+  },
+  "sessions": {
+    "description": "What each slot looks like at each intensity. Duration is scaled by the volume modifier.",
+    "STRENGTH": {
+      "HIGH": {
+        "type": "STRENGTH",
+        "focus": "Heavy compound lifts",
+        "minutes": 60
+      },
+      "MODERATE": {
+        "type": "STRENGTH",
+        "focus": "Full body strength - volume",
+        "minutes": 55
+      },
+      "LOW": {
+        "type": "STRENGTH",
+        "focus": "Light technique work",
+        "minutes": 45
+      }
+    },
+    "CARDIO": {
+      "HIGH": {
+        "type": "CARDIO_HIIT",
+        "focus": "Intervals 6x400m",
+        "minutes": 35
+      },
+      "MODERATE": {
+        "type": "CARDIO_LISS",
+        "focus": "Steady state cardio",
+        "minutes": 45
+      },
+      "LOW": {
+        "type": "CARDIO_LISS",
+        "focus": "Easy zone 2 walk/jog",
+        "minutes": 40
+      }
+    },
+    "MOBILITY": {
+      "HIGH": {
+        "type": "MOBILITY",
+        "focus": "Yoga + mobility",
+        "minutes": 30
+      },
+      "MODERATE": {
+        "type": "MOBILITY",
+        "focus": "Yoga + mobility",
+        "minutes": 30
+      },
+      "LOW": {
+        "type": "MOBILITY",
+        "focus": "Yoga + mobility",
+        "minutes": 30
+      }
+    }
   }
 }

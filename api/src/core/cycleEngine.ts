@@ -128,3 +128,25 @@ export function computeCycle(input: CycleInput): CycleState {
     days,
   };
 }
+
+/**
+ * Cycle day, phase and week for any date, including future days the plan
+ * generator needs. Past the expected cycle length it predicts the next cycle
+ * (day 30 of a 29-day cycle becomes day 1) unless she is already late today,
+ * in which case the days stay late luteal until she logs a period.
+ */
+export function dayInfo(input: CycleInput, date: IsoDate): CycleDay | null {
+  const { lastPeriodStart, cycleLength, periodLength, regularity, suppressed, today } = input;
+  if (!lastPeriodStart) return null;
+
+  const rawDay = daysBetween(lastPeriodStart, date) + 1;
+  if (rawDay < 1) return null;
+
+  const lateToday = daysBetween(lastPeriodStart, today) + 1 > cycleLength;
+  const day = rawDay <= cycleLength || lateToday ? rawDay : ((rawDay - 1) % cycleLength) + 1;
+
+  const phase: Phase = suppressed
+    ? 'SUPPRESSED'
+    : phaseOnDay(Math.min(day, cycleLength), periodLength, phaseBands(cycleLength, periodLength, regularity));
+  return { day, date, phase, week: cycleWeekOf(day) };
+}

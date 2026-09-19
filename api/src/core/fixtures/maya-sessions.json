@@ -1,0 +1,373 @@
+{
+ "exportedOn": "2026-09-19",
+ "sessions": [
+  {
+   "sessionDate": "2026-07-12",
+   "cycleDay": 2,
+   "status": "COMPLETED",
+   "energy": 2,
+   "effort": 9,
+   "plannedIntensity": "LOW"
+  },
+  {
+   "sessionDate": "2026-07-13",
+   "cycleDay": 3,
+   "status": "COMPLETED",
+   "energy": 3,
+   "effort": 8,
+   "plannedIntensity": "LOW"
+  },
+  {
+   "sessionDate": "2026-07-15",
+   "cycleDay": 5,
+   "status": "COMPLETED",
+   "energy": 3,
+   "effort": 8,
+   "plannedIntensity": "LOW"
+  },
+  {
+   "sessionDate": "2026-07-16",
+   "cycleDay": 6,
+   "status": "COMPLETED",
+   "energy": 3,
+   "effort": 8,
+   "plannedIntensity": "MODERATE"
+  },
+  {
+   "sessionDate": "2026-07-18",
+   "cycleDay": 8,
+   "status": "COMPLETED",
+   "energy": 4,
+   "effort": 7,
+   "plannedIntensity": "MODERATE"
+  },
+  {
+   "sessionDate": "2026-07-19",
+   "cycleDay": 9,
+   "status": "COMPLETED",
+   "energy": 4,
+   "effort": 7,
+   "plannedIntensity": "HIGH"
+  },
+  {
+   "sessionDate": "2026-07-21",
+   "cycleDay": 11,
+   "status": "COMPLETED",
+   "energy": 5,
+   "effort": 7,
+   "plannedIntensity": "HIGH"
+  },
+  {
+   "sessionDate": "2026-07-22",
+   "cycleDay": 12,
+   "status": "COMPLETED",
+   "energy": 5,
+   "effort": 7,
+   "plannedIntensity": "HIGH"
+  },
+  {
+   "sessionDate": "2026-07-24",
+   "cycleDay": 14,
+   "status": "COMPLETED",
+   "energy": 5,
+   "effort": 7,
+   "plannedIntensity": "HIGH"
+  },
+  {
+   "sessionDate": "2026-07-25",
+   "cycleDay": 15,
+   "status": "COMPLETED",
+   "energy": 5,
+   "effort": 7,
+   "plannedIntensity": "HIGH"
+  },
+  {
+   "sessionDate": "2026-07-27",
+   "cycleDay": 17,
+   "status": "COMPLETED",
+   "energy": 3,
+   "effort": 8,
+   "plannedIntensity": "MODERATE"
+  },
+  {
+   "sessionDate": "2026-07-28",
+   "cycleDay": 18,
+   "status": "PARTIAL",
+   "energy": 2,
+   "effort": 9,
+   "plannedIntensity": "MODERATE"
+  },
+  {
+   "sessionDate": "2026-07-30",
+   "cycleDay": 20,
+   "status": "COMPLETED",
+   "energy": 2,
+   "effort": 9,
+   "plannedIntensity": "MODERATE"
+  },
+  {
+   "sessionDate": "2026-07-31",
+   "cycleDay": 21,
+   "status": "COMPLETED",
+   "energy": 3,
+   "effort": 8,
+   "plannedIntensity": "MODERATE"
+  },
+  {
+   "sessionDate": "2026-08-02",
+   "cycleDay": 23,
+   "status": "PARTIAL",
+   "energy": 3,
+   "effort": 8,
+   "plannedIntensity": "LOW"
+  },
+  {
+   "sessionDate": "2026-08-03",
+   "cycleDay": 24,
+   "status": "COMPLETED",
+   "energy": 2,
+   "effort": 9,
+   "plannedIntensity": "LOW"
+  },
+  {
+   "sessionDate": "2026-08-05",
+   "cycleDay": 26,
+   "status": "COMPLETED",
+   "energy": 2,
+   "effort": 9,
+   "plannedIntensity": "LOW"
+  },
+  {
+   "sessionDate": "2026-08-06",
+   "cycleDay": 27,
+   "status": "SKIPPED",
+   "energy": 2,
+   "effort": null,
+   "plannedIntensity": "LOW"
+  },
+  {
+   "sessionDate": "2026-08-10",
+   "cycleDay": 2,
+   "status": "COMPLETED",
+   "energy": 2,
+   "effort": 9,
+   "plannedIntensity": "LOW"
+  },
+  {
+   "sessionDate": "2026-08-11",
+   "cycleDay": 3,
+   "status": "COMPLETED",
+   "energy": 4,
+   "effort": 7,
+   "plannedIntensity": "LOW"
+  },
+  {
+   "sessionDate": "2026-08-13",
+   "cycleDay": 5,
+   "status": "COMPLETED",
+   "energy": 3,
+   "effort": 8,
+   "plannedIntensity": "LOW"
+  },
+  {
+   "sessionDate": "2026-08-14",
+   "cycleDay": 6,
+   "status": "COMPLETED",
+   "energy": 2,
+   "effort": 9,
+   "plannedIntensity": "MODERATE"
+  },
+  {
+   "sessionDate": "2026-08-16",
+   "cycleDay": 8,
+   "status": "COMPLETED",
+   "energy": 4,
+   "effort": 7,
+   "plannedIntensity": "MODERATE"
+  },
+  {
+   "sessionDate": "2026-08-17",
+   "cycleDay": 9,
+   "status": "COMPLETED",
+   "energy": 4,
+   "effort": 7,
+   "plannedIntensity": "HIGH"
+  },
+  {
+   "sessionDate": "2026-08-19",
+   "cycleDay": 11,
+   "status": "COMPLETED",
+   "energy": 5,
+   "effort": 7,
+   "plannedIntensity": "HIGH"
+  },
+  {
+   "sessionDate": "2026-08-20",
+   "cycleDay": 12,
+   "status": "COMPLETED",
+   "energy": 5,
+   "effort": 7,
+   "plannedIntensity": "HIGH"
+  },
+  {
+   "sessionDate": "2026-08-22",
+   "cycleDay": 14,
+   "status": "COMPLETED",
+   "energy": 5,
+   "effort": 7,
+   "plannedIntensity": "HIGH"
+  },
+  {
+   "sessionDate": "2026-08-23",
+   "cycleDay": 15,
+   "status": "COMPLETED",
+   "energy": 5,
+   "effort": 7,
+   "plannedIntensity": "HIGH"
+  },
+  {
+   "sessionDate": "2026-08-25",
+   "cycleDay": 17,
+   "status": "COMPLETED",
+   "energy": 3,
+   "effort": 8,
+   "plannedIntensity": "MODERATE"
+  },
+  {
+   "sessionDate": "2026-08-26",
+   "cycleDay": 18,
+   "status": "COMPLETED",
+   "energy": 2,
+   "effort": 9,
+   "plannedIntensity": "MODERATE"
+  },
+  {
+   "sessionDate": "2026-08-28",
+   "cycleDay": 20,
+   "status": "COMPLETED",
+   "energy": 2,
+   "effort": 9,
+   "plannedIntensity": "MODERATE"
+  },
+  {
+   "sessionDate": "2026-08-29",
+   "cycleDay": 21,
+   "status": "PARTIAL",
+   "energy": 2,
+   "effort": 9,
+   "plannedIntensity": "MODERATE"
+  },
+  {
+   "sessionDate": "2026-08-31",
+   "cycleDay": 23,
+   "status": "COMPLETED",
+   "energy": 3,
+   "effort": 8,
+   "plannedIntensity": "LOW"
+  },
+  {
+   "sessionDate": "2026-09-01",
+   "cycleDay": 24,
+   "status": "SKIPPED",
+   "energy": 2,
+   "effort": null,
+   "plannedIntensity": "LOW"
+  },
+  {
+   "sessionDate": "2026-09-03",
+   "cycleDay": 26,
+   "status": "COMPLETED",
+   "energy": 2,
+   "effort": 9,
+   "plannedIntensity": "LOW"
+  },
+  {
+   "sessionDate": "2026-09-04",
+   "cycleDay": 27,
+   "status": "PARTIAL",
+   "energy": 2,
+   "effort": 9,
+   "plannedIntensity": "LOW"
+  },
+  {
+   "sessionDate": "2026-09-09",
+   "cycleDay": 2,
+   "status": "COMPLETED",
+   "energy": 2,
+   "effort": 9,
+   "plannedIntensity": "LOW"
+  },
+  {
+   "sessionDate": "2026-09-10",
+   "cycleDay": 3,
+   "status": "COMPLETED",
+   "energy": 3,
+   "effort": 8,
+   "plannedIntensity": "LOW"
+  },
+  {
+   "sessionDate": "2026-09-12",
+   "cycleDay": 5,
+   "status": "COMPLETED",
+   "energy": 3,
+   "effort": 8,
+   "plannedIntensity": "LOW"
+  },
+  {
+   "sessionDate": "2026-09-13",
+   "cycleDay": 6,
+   "status": "COMPLETED",
+   "energy": 3,
+   "effort": 8,
+   "plannedIntensity": "MODERATE"
+  },
+  {
+   "sessionDate": "2026-09-15",
+   "cycleDay": 8,
+   "status": "COMPLETED",
+   "energy": 4,
+   "effort": 7,
+   "plannedIntensity": "MODERATE"
+  },
+  {
+   "sessionDate": "2026-09-16",
+   "cycleDay": 9,
+   "status": "COMPLETED",
+   "energy": 4,
+   "effort": 7,
+   "plannedIntensity": "HIGH"
+  },
+  {
+   "sessionDate": "2026-09-18",
+   "cycleDay": 11,
+   "status": "COMPLETED",
+   "energy": 5,
+   "effort": 7,
+   "plannedIntensity": "HIGH"
+  },
+  {
+   "sessionDate": "2026-09-19",
+   "cycleDay": 12,
+   "status": "PLANNED",
+   "energy": null,
+   "effort": null,
+   "plannedIntensity": "HIGH"
+  },
+  {
+   "sessionDate": "2026-09-21",
+   "cycleDay": 14,
+   "status": "PLANNED",
+   "energy": null,
+   "effort": null,
+   "plannedIntensity": "HIGH"
+  },
+  {
+   "sessionDate": "2026-09-22",
+   "cycleDay": 15,
+   "status": "PLANNED",
+   "energy": null,
+   "effort": null,
+   "plannedIntensity": "HIGH"
+  }
+ ]
+}

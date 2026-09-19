@@ -156,16 +156,14 @@ of textbook, under the threshold, so it stays exactly textbook.
 Stores the user profile, cycle history, generated plans and session logs (four
 tables, already built in `database/`), plus the seed data.
 
-**Changes for the learning loop:**
-- Add to `training_plans`: `textbook_intensity_modifier`,
-  `personal_adjustment`, `adjustment_reason`. Keep `intensity_modifier` as the
-  final value.
-- **The seed plans must show the learning ramp.** Cycle 1 plans get 0
-  adjustment (no data yet). Cycle 2 plans get a partial adjustment (low
-  confidence). Current-cycle plans get the full adjustment. Ideally, generate
-  them by running the real Part 2 and learning layer over the seed logs with
-  `asOfDate = week_start_date`. If time is short, hand-compute them with the
-  same formula.
+**Changes for the learning loop (as built):**
+- No schema change. A generated plan's textbook modifier, personal adjustment
+  and reason go in the existing `plan_json` column (the full `WeekPlan`), with
+  `intensity_modifier` holding the final value.
+- **The learning ramp is calculated, not seeded.** `/api/insights` replays
+  `learnedPattern(asOf)` weekly over her logs: no adjustment through cycle 1,
+  −0.17 once cycle 1's week 3 is logged, −0.2 from cycle 2 on. The seeded
+  plans stay textbook, which is honest: the app was still learning then.
 - The seed pattern must clearly **differ** from the textbook. It does: she
   crashes in week 3 (2.90 vs 4.0) and tracks textbook everywhere else. Keep it
   that way, because a seed user who matches the textbook kills the story.
@@ -232,16 +230,16 @@ something that could be demoed if time ran out right there.
 
 **Must have: the learning story works**
 
-0. **Scaffold.** Set up the Vite React TS app and the Express TS API, connect
+0. ✅ **Scaffold.** Set up the Vite React TS app and the Express TS API, connect
    the API to MySQL, and check that one endpoint returns Maya's data.
-1. **Shared definitions + rules JSON.** Fix the textbook numbers first.
-2. **Part 1 cycle engine**, with a handful of hardcoded-date tests.
-3. **Part 2 textbook layer.**
-4. **Learning layer**, tested against the seed logs (expect week 1 to be
+1. ✅ **Shared definitions + rules JSON.** Fix the textbook numbers first.
+2. ✅ **Part 1 cycle engine**, with a handful of hardcoded-date tests.
+3. ✅ **Part 2 textbook layer.**
+4. ✅ **Learning layer**, tested against the seed logs (expect week 1 to be
    dialed down).
-5. **Part 2 personal layer.** Plans now carry textbook, adjustment and reason.
-6. **Part 3:** add the three columns, then regenerate the seed plans with the
-   ramp.
+5. ✅ **Part 2 personal layer.** Plans now carry textbook, adjustment and reason.
+6. ✅ **Part 3:** no schema change needed (see Part 3). Endpoints are live:
+   `/api/today`, `/api/insights`, `/api/plans/preview`.
 7. **Part 7 insights**, including the pattern chart and "what we changed".
    This is the payoff screen, so it comes before anything else visual.
 
