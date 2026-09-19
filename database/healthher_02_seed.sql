@@ -15,8 +15,10 @@
 -- session waiting to be logged.
 --
 -- The logged energy scores are deliberately shaped so Part 7 finds a
--- real pattern: she peaks in cycle WEEK 2, not week 1 like the
--- textbook says. Run healthher_03_queries.sql section 7 to see it.
+-- real pattern: the textbook says energy holds up through week 3
+-- (days 15-21), but she crashes straight after ovulation, from day 17.
+-- The learning layer turns that into an earlier deload. Run
+-- healthher_03_queries.sql section 7 to see it.
 --
 -- Re-runnable: deletes the demo user first, cascades everything.
 -- Run after healthher_01_schema.sql.
@@ -168,9 +170,9 @@ VALUES
   (@uid, CURDATE() - INTERVAL 59 DAY, 12, 'FOLLICULAR', 'STRENGTH', 'HIGH', 60, 'Lower body strength - heavy', 'COMPLETED', 5, 7, 60, NULL, TIMESTAMP(CURDATE() - INTERVAL 59 DAY, '19:30:00')),
   (@uid, CURDATE() - INTERVAL 57 DAY, 14, 'OVULATORY', 'STRENGTH', 'HIGH', 65, 'Upper body strength - peak load', 'COMPLETED', 5, 7, 65, NULL, TIMESTAMP(CURDATE() - INTERVAL 57 DAY, '19:30:00')),
   (@uid, CURDATE() - INTERVAL 56 DAY, 15, 'OVULATORY', 'CARDIO_HIIT', 'HIGH', 35, 'Sprint intervals', 'COMPLETED', 5, 7, 35, 'Best session of the month', TIMESTAMP(CURDATE() - INTERVAL 56 DAY, '19:30:00')),
-  (@uid, CURDATE() - INTERVAL 54 DAY, 17, 'LUTEAL', 'CARDIO_LISS', 'MODERATE', 45, 'Steady state 45 min', 'COMPLETED', 4, 7, 45, NULL, TIMESTAMP(CURDATE() - INTERVAL 54 DAY, '19:30:00')),
-  (@uid, CURDATE() - INTERVAL 53 DAY, 18, 'LUTEAL', 'STRENGTH', 'MODERATE', 55, 'Full body strength - volume', 'COMPLETED', 4, 7, 55, NULL, TIMESTAMP(CURDATE() - INTERVAL 53 DAY, '19:30:00')),
-  (@uid, CURDATE() - INTERVAL 51 DAY, 20, 'LUTEAL', 'STRENGTH', 'MODERATE', 55, 'Full body strength - volume', 'COMPLETED', 3, 8, 55, NULL, TIMESTAMP(CURDATE() - INTERVAL 51 DAY, '19:30:00')),
+  (@uid, CURDATE() - INTERVAL 54 DAY, 17, 'LUTEAL', 'CARDIO_LISS', 'MODERATE', 45, 'Steady state 45 min', 'COMPLETED', 3, 8, 45, 'Flat after a great week', TIMESTAMP(CURDATE() - INTERVAL 54 DAY, '19:30:00')),
+  (@uid, CURDATE() - INTERVAL 53 DAY, 18, 'LUTEAL', 'STRENGTH', 'MODERATE', 55, 'Full body strength - volume', 'PARTIAL', 2, 9, 35, 'Weights felt twice as heavy, dropped the last block', TIMESTAMP(CURDATE() - INTERVAL 53 DAY, '19:30:00')),
+  (@uid, CURDATE() - INTERVAL 51 DAY, 20, 'LUTEAL', 'STRENGTH', 'MODERATE', 55, 'Full body strength - volume', 'COMPLETED', 2, 9, 55, NULL, TIMESTAMP(CURDATE() - INTERVAL 51 DAY, '19:30:00')),
   (@uid, CURDATE() - INTERVAL 50 DAY, 21, 'LUTEAL', 'CARDIO_LISS', 'MODERATE', 45, 'Steady state 45 min', 'COMPLETED', 3, 8, 45, NULL, TIMESTAMP(CURDATE() - INTERVAL 50 DAY, '19:30:00')),
   (@uid, CURDATE() - INTERVAL 48 DAY, 23, 'LUTEAL', 'MOBILITY', 'LOW', 30, 'Yoga + mobility', 'PARTIAL', 3, 8, 15, 'Cut it short, energy tanked', TIMESTAMP(CURDATE() - INTERVAL 48 DAY, '19:30:00')),
   (@uid, CURDATE() - INTERVAL 47 DAY, 24, 'LUTEAL', 'STRENGTH', 'LOW', 45, 'Light technique work', 'COMPLETED', 2, 9, 45, NULL, TIMESTAMP(CURDATE() - INTERVAL 47 DAY, '19:30:00')),
@@ -187,10 +189,10 @@ VALUES
   (@uid, CURDATE() - INTERVAL 30 DAY, 12, 'FOLLICULAR', 'STRENGTH', 'HIGH', 60, 'Lower body strength - heavy', 'COMPLETED', 5, 7, 60, NULL, TIMESTAMP(CURDATE() - INTERVAL 30 DAY, '19:30:00')),
   (@uid, CURDATE() - INTERVAL 28 DAY, 14, 'OVULATORY', 'STRENGTH', 'HIGH', 65, 'Upper body strength - peak load', 'COMPLETED', 5, 7, 65, 'Hit a PR on squats, felt unstoppable', TIMESTAMP(CURDATE() - INTERVAL 28 DAY, '19:30:00')),
   (@uid, CURDATE() - INTERVAL 27 DAY, 15, 'OVULATORY', 'CARDIO_HIIT', 'HIGH', 35, 'Sprint intervals', 'COMPLETED', 5, 7, 35, NULL, TIMESTAMP(CURDATE() - INTERVAL 27 DAY, '19:30:00')),
-  (@uid, CURDATE() - INTERVAL 25 DAY, 17, 'LUTEAL', 'CARDIO_LISS', 'MODERATE', 45, 'Steady state 45 min', 'COMPLETED', 4, 7, 45, NULL, TIMESTAMP(CURDATE() - INTERVAL 25 DAY, '19:30:00')),
-  (@uid, CURDATE() - INTERVAL 24 DAY, 18, 'LUTEAL', 'STRENGTH', 'MODERATE', 55, 'Full body strength - volume', 'COMPLETED', 4, 7, 55, NULL, TIMESTAMP(CURDATE() - INTERVAL 24 DAY, '19:30:00')),
+  (@uid, CURDATE() - INTERVAL 25 DAY, 17, 'LUTEAL', 'CARDIO_LISS', 'MODERATE', 45, 'Steady state 45 min', 'COMPLETED', 3, 8, 45, NULL, TIMESTAMP(CURDATE() - INTERVAL 25 DAY, '19:30:00')),
+  (@uid, CURDATE() - INTERVAL 24 DAY, 18, 'LUTEAL', 'STRENGTH', 'MODERATE', 55, 'Full body strength - volume', 'COMPLETED', 2, 9, 55, 'Same crash as last month, right after the PR week', TIMESTAMP(CURDATE() - INTERVAL 24 DAY, '19:30:00')),
   (@uid, CURDATE() - INTERVAL 22 DAY, 20, 'LUTEAL', 'STRENGTH', 'MODERATE', 55, 'Full body strength - volume', 'COMPLETED', 2, 9, 55, NULL, TIMESTAMP(CURDATE() - INTERVAL 22 DAY, '19:30:00')),
-  (@uid, CURDATE() - INTERVAL 21 DAY, 21, 'LUTEAL', 'CARDIO_LISS', 'MODERATE', 45, 'Steady state 45 min', 'COMPLETED', 3, 8, 45, NULL, TIMESTAMP(CURDATE() - INTERVAL 21 DAY, '19:30:00')),
+  (@uid, CURDATE() - INTERVAL 21 DAY, 21, 'LUTEAL', 'CARDIO_LISS', 'MODERATE', 45, 'Steady state 45 min', 'PARTIAL', 2, 9, 25, 'Legs heavy, stopped early', TIMESTAMP(CURDATE() - INTERVAL 21 DAY, '19:30:00')),
   (@uid, CURDATE() - INTERVAL 19 DAY, 23, 'LUTEAL', 'MOBILITY', 'LOW', 30, 'Yoga + mobility', 'COMPLETED', 3, 8, 30, NULL, TIMESTAMP(CURDATE() - INTERVAL 19 DAY, '19:30:00')),
   (@uid, CURDATE() - INTERVAL 18 DAY, 24, 'LUTEAL', 'STRENGTH', 'LOW', 45, 'Light technique work', 'SKIPPED', 2, NULL, NULL, 'Too wiped out, called it', TIMESTAMP(CURDATE() - INTERVAL 18 DAY, '19:30:00')),
   (@uid, CURDATE() - INTERVAL 16 DAY, 26, 'LUTEAL', 'STRENGTH', 'LOW', 45, 'Light technique work', 'COMPLETED', 2, 9, 45, NULL, TIMESTAMP(CURDATE() - INTERVAL 16 DAY, '19:30:00')),

@@ -328,7 +328,7 @@ GROUP  BY user_id, phase;
 
 
 -- Part 7: the headline insight. Week of cycle, not phase, so the copy
--- can say "you peak in week 2, not week 1".
+-- can say "your energy crashes in week 3, a week earlier than typical".
 CREATE VIEW v_cycle_week_performance AS
 SELECT user_id,
        CEIL(cycle_day / 7)                                        AS cycle_week,

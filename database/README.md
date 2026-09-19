@@ -48,15 +48,19 @@ plans, 43 logged sessions, 3 upcoming.
 always lands on cycle day 12 (late follicular): two thirds of the wheel is
 filled in and there is a session waiting to be logged.
 
-The logged energy scores are shaped so Part 7 finds a real pattern —
-she peaks in cycle **week 2**, while the textbook curve peaks in week 1:
+The logged energy scores are shaped so Part 7 finds a real pattern. The
+textbook says energy holds up through week 3 (days 15-21); Maya crashes
+straight after ovulation, from day 17. Every other week is close to textbook,
+so the one difference is unmistakable:
 
 ```
-week 1   2.75   (textbook 4.5)   -1.75
-week 2   4.54   (textbook 4.0)   +0.54   <- her peak
-week 3   3.70   (textbook 3.0)   +0.70
+week 1   2.75   (textbook 3.0)   -0.25
+week 2   4.54   (textbook 4.5)   +0.04
+week 3   2.90   (textbook 4.0)   -1.10   <- her early crash
 week 4   2.25   (textbook 2.5)   -0.25
 ```
+
+Today is cycle day 12, so the adjusted week (days 15-21) is her upcoming one.
 
 Section 7 of `healthher_03_queries.sql` produces that table and the headline
 string straight from the database.

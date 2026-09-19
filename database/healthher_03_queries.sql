@@ -200,9 +200,11 @@ WHERE  user_id = @uid AND status <> 'PLANNED';
 
 
 -- 7b. THE HEADLINE. Her energy by week of cycle against the textbook
---     curve. The textbook says energy rebounds the moment the period
---     ends and peaks in week 1. The seeded user peaks in week 2, a full
---     week later, which is the "your pattern is different" line.
+--     curve (same numbers as api/src/core/rules.json). The textbook
+--     says energy is lowest on her period, peaks around ovulation and
+--     holds up through week 3 before the late-luteal dip. The seeded
+--     user crashes straight after ovulation, a week early: week 3 is
+--     the "your pattern is different" line.
 SELECT w.cycle_week,
        w.sessions,
        w.avg_energy                                   AS your_energy,
@@ -210,9 +212,9 @@ SELECT w.cycle_week,
        ROUND(w.avg_energy - t.textbook_energy, 2)     AS difference,
        w.completion_pct
 FROM   v_cycle_week_performance w
-JOIN   (SELECT 1 AS cycle_week, 4.5 AS textbook_energy UNION ALL
-        SELECT 2, 4.0 UNION ALL
-        SELECT 3, 3.0 UNION ALL
+JOIN   (SELECT 1 AS cycle_week, 3.0 AS textbook_energy UNION ALL
+        SELECT 2, 4.5 UNION ALL
+        SELECT 3, 4.0 UNION ALL
         SELECT 4, 2.5 UNION ALL
         SELECT 5, 2.5) t ON t.cycle_week = w.cycle_week
 WHERE  w.user_id = @uid
@@ -232,22 +234,22 @@ WHERE  user_id = @uid
 ORDER  BY FIELD(phase, 'MENSTRUAL','FOLLICULAR','OVULATORY','LUTEAL','SUPPRESSED','UNKNOWN');
 
 
--- 7d. The one-line callout: her peak week against the textbook's.
-SELECT CONCAT('You actually peak in week ', peak.cycle_week,
-              ', not week 1 like the textbook says')  AS headline,
-       peak.cycle_week    AS your_peak_week,
-       peak.avg_energy    AS your_peak_energy,
-       1                  AS textbook_peak_week,
-       wk1.avg_energy     AS your_week1_energy,
-       peak.sessions      AS sessions_behind_it
-FROM   (SELECT cycle_week, avg_energy, sessions
-        FROM   v_cycle_week_performance
-        WHERE  user_id = @uid
-        ORDER  BY avg_energy DESC
-        LIMIT  1) peak
-CROSS  JOIN (SELECT avg_energy
-             FROM   v_cycle_week_performance
-             WHERE  user_id = @uid AND cycle_week = 1) wk1;
+-- 7d. The one-line callout: the week where she differs most from the
+--     textbook, and in which direction.
+SELECT CONCAT('Your energy in week ', g.cycle_week, ' runs ',
+              ABS(g.difference), CASE WHEN g.difference < 0 THEN ' below' ELSE ' above' END,
+              ' the textbook (', g.avg_energy, ' vs ', g.textbook_energy, ')') AS headline,
+       g.cycle_week, g.avg_energy, g.textbook_energy, g.difference,
+       g.sessions         AS sessions_behind_it
+FROM   (SELECT w.cycle_week, w.avg_energy, w.sessions, t.textbook_energy,
+               ROUND(w.avg_energy - t.textbook_energy, 2) AS difference
+        FROM   v_cycle_week_performance w
+        JOIN   (SELECT 1 AS cycle_week, 3.0 AS textbook_energy UNION ALL
+                SELECT 2, 4.5 UNION ALL SELECT 3, 4.0 UNION ALL
+                SELECT 4, 2.5 UNION ALL SELECT 5, 2.5) t ON t.cycle_week = w.cycle_week
+        WHERE  w.user_id = @uid
+        ORDER  BY ABS(w.avg_energy - t.textbook_energy) DESC
+        LIMIT  1) g;
 
 
 -- 7e. Where plans fall apart, so the generator can back off there.
