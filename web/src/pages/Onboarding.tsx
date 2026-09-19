@@ -258,13 +258,15 @@ interface Step {
   body: ReactNode
 }
 
-export function Onboarding({ onDone, onCancel }: { onDone: (user: CurrentUser) => void; onCancel: () => void }) {
+export function Onboarding({ initialName = '', onDone, onCancel }: {
+  initialName?: string; onDone: (user: CurrentUser) => void; onCancel: () => void
+}) {
   const [step, setStep] = useState(0)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [options, setOptions] = useState<EquipmentOptions | null>(null)
   const [a, setA] = useState<Draft>({
-    firstName: '', goal: null, experience: null, consistency: null,
+    firstName: initialName, goal: null, experience: null, consistency: null,
     units: defaultUnits(), heightCm: '', heightFt: '', heightIn: '', weight: '', age: '', goalWeight: '',
     equipmentTier: null, equipment: null, weekdays: [],
     birthControl: null, lastPeriodStart: null, cycleLength: 28, regularity: 'REGULAR',

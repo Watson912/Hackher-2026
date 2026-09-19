@@ -1,6 +1,6 @@
 import { useAuth0 } from '@auth0/auth0-react'
 import { useEffect, useState, type ReactNode } from 'react'
-import { setTokenProvider } from './api.ts'
+import { findAccount, setTokenProvider } from './api.ts'
 import { Cycle } from './pages/Cycle.tsx'
 import { Insights } from './pages/Insights.tsx'
 import { Landing } from './pages/Landing.tsx'
@@ -34,7 +34,7 @@ const ICONS: Record<keyof typeof TABS | 'settings' | 'switch', ReactNode> = {
 }
 
 function App() {
-  const { isAuthenticated, isLoading, logout, getAccessTokenSilently } = useAuth0()
+  const { isAuthenticated, isLoading, user: login, logout, getAccessTokenSilently } = useAuth0()
   const [user, setUser] = useState<CurrentUser | null>(loadCurrentUser)
 
   // Done during render, not in an effect: child effects run before the
@@ -42,6 +42,35 @@ function App() {
   setTokenProvider(isAuthenticated ? () => getAccessTokenSilently() : null)
   const [onboarding, setOnboarding] = useState(false)
   const [tab, setTab] = useState<Tab>(tabFromHash)
+  const [accountChecked, setAccountChecked] = useState(false)
+  const [accountError, setAccountError] = useState<string | null>(null)
+
+  // Once Auth0 knows who is signed in, ask the API which account that login
+  // owns. An existing account opens straight into her data; a new login goes
+  // straight to onboarding. The server's answer replaces whatever this
+  // browser remembered, so a shared computer never shows someone else.
+  useEffect(() => {
+    if (isLoading) return
+    if (!isAuthenticated) {
+      saveCurrentUser(null)
+      return
+    }
+    let cancelled = false
+    findAccount().then(
+      (account) => {
+        if (cancelled) return
+        saveCurrentUser(account)
+        setUser(account)
+        if (!account) setOnboarding(true)
+        setAccountChecked(true)
+      },
+      (e: Error) => { if (!cancelled) setAccountError(e.message) },
+    )
+    return () => { cancelled = true }
+  }, [isLoading, isAuthenticated])
+
+  // First name from her login (Google gives one; an email login doesn't).
+  const loginName = login?.given_name ?? (login?.name && !login.name.includes('@') ? login.name.split(' ')[0] : '')
 
   useEffect(() => {
     const onHash = () => setTab(tabFromHash())
@@ -65,17 +94,27 @@ function App() {
     if (isAuthenticated) logout({ logoutParams: { returnTo: location.origin } })
   }
 
-  // The SDK reads the existing session before it can say who is signed in.
-  // Waiting avoids a flash of the landing page on every reload.
-  if (isLoading) {
+  if (accountError) {
+    return (
+      <main className="narrow">
+        <p className="error">Couldn't load your account: {accountError}</p>
+        <button type="button" className="btn btn-secondary" onClick={() => location.reload()}>Try again</button>
+      </main>
+    )
+  }
+  // The SDK reads the existing session before it can say who is signed in,
+  // then her account is looked up. Waiting avoids a flash of the landing page.
+  if (isLoading || (isAuthenticated && !accountChecked)) {
     return <main className="narrow"><p className="muted">Loading…</p></main>
   }
 
-  if (!user) {
+  // A remembered user without a login would only get 401s.
+  const account = isAuthenticated ? user : null
+  if (!account) {
     return (
       <main className="narrow landing-main">
         {onboarding
-          ? <Onboarding onDone={signIn} onCancel={() => setOnboarding(false)} />
+          ? <Onboarding initialName={loginName} onDone={signIn} onCancel={() => setOnboarding(false)} />
           : <Landing onStart={() => setOnboarding(true)} onSignedIn={signIn} />}
       </main>
     )
@@ -97,9 +136,9 @@ function App() {
           <span className="brand"><span className="brand-mark" aria-hidden="true" />CycleSync</span>
           <nav className="side-nav" aria-label="Sections">{sectionLinks}</nav>
           <span className="user-chip">
-            <span className="avatar" aria-hidden="true">{user.firstName.charAt(0).toUpperCase()}</span>
-            <span className="user-name">{user.firstName}</span>
-            {user.isDemo && <span className="demo-tag">demo</span>}
+            <span className="avatar" aria-hidden="true">{account.firstName.charAt(0).toUpperCase()}</span>
+            <span className="user-name">{account.firstName}</span>
+            {account.isDemo && <span className="demo-tag">demo</span>}
             <a href="#settings" className={`icon-btn${tab === 'settings' ? ' active' : ''}`} aria-label="Settings" title="Settings">
               {ICONS.settings}
             </a>
@@ -110,7 +149,7 @@ function App() {
         </div>
       </header>
       {/* key: remount pages when the user changes so nothing stale shows */}
-      <main key={user.userId} className={`app-main page-${tab}`}>
+      <main key={account.userId} className={`app-main page-${tab}`}>
         {tab === 'today' && <Today />}
         {tab === 'plan' && <Plan />}
         {tab === 'cycle' && <Cycle />}

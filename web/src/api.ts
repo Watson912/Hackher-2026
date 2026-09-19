@@ -10,7 +10,7 @@ export const setTokenProvider = (fn: (() => Promise<string | undefined>) | null)
 // Thin wrapper around fetch. Vite proxies /api to the Express server, and
 // every request carries her Auth0 access token; the API reads whose data to
 // use out of the token, so the browser can't ask for someone else's.
-export async function api<T>(path: string, init?: RequestInit): Promise<T> {
+async function request(path: string, init?: RequestInit) {
   const token = getToken ? await getToken() : null
   const res = await fetch(`/api${path}`, {
     ...init,
@@ -21,16 +21,33 @@ export async function api<T>(path: string, init?: RequestInit): Promise<T> {
     },
   })
   const body = await res.json().catch(() => ({}))
-  // No account behind this login yet, or the saved one is gone (the demo
-  // reset re-creates Maya with a new id): go back to the start screen, where
-  // she is still signed in with Auth0 and can onboard.
-  if (res.status === 404 && /^No user/.test(body.error ?? '')) {
+  return { res, body }
+}
+
+const noAccount = (res: Response, body: { error?: string }) => res.status === 404 && /^No user/.test(body.error ?? '')
+
+export async function api<T>(path: string, init?: RequestInit): Promise<T> {
+  const { res, body } = await request(path, init)
+  // The account went away mid-session (the demo reset re-creates Maya with a
+  // new id): reload, and App looks her account up again from her login.
+  if (noAccount(res, body)) {
     saveCurrentUser(null)
     location.hash = ''
     location.reload()
   }
   if (!res.ok) throw new Error(body.error ?? `${res.status} ${res.statusText}`)
   return body as T
+}
+
+/**
+ * The CycleSync account behind the signed-in login, or null if she hasn't
+ * onboarded yet. The API works out who she is from her token.
+ */
+export async function findAccount(): Promise<CurrentUser | null> {
+  const { res, body } = await request('/me')
+  if (noAccount(res, body)) return null
+  if (!res.ok) throw new Error(body.error ?? `${res.status} ${res.statusText}`)
+  return { userId: body.user_id, firstName: body.first_name, isDemo: Boolean(body.is_demo) }
 }
 
 export const post = <T>(path: string, body: unknown) => api<T>(path, { method: 'POST', body: JSON.stringify(body) })
