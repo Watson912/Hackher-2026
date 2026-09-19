@@ -67,13 +67,13 @@ export function CycleWheel({ cycle, days }: { cycle: CycleState; days: WheelDay[
     <figure className="chart wheel">
       <div className="legend wrap" aria-hidden="true">
         {PHASES.map((p) => <span key={p}><i className={`key key-phase phase-${p.toLowerCase()}`} /> {phaseLabel(p)}</span>)}
-        <span><i className="key key-bar" /> Your load</span>
+        <span><i className="key key-bar" /> Your plan</span>
         <span><i className="key key-tick" /> Textbook</span>
       </div>
 
       <div className="chart-plot wheel-plot" ref={ref}>
         <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} role="img"
-          aria-label={`Cycle wheel: day ${cycle.cycleDay} of ${n}, ${phaseLabel(cycle.phase)}. Training load for each day compared with the textbook; see the table below for details.`}>
+          aria-label={`Cycle wheel: day ${cycle.cycleDay} of ${n}, ${phaseLabel(cycle.phase)}. How hard each day trains compared with the standard plan; see the table below for details.`}>
           {/* phase ring, with a surface gap between phases */}
           {phaseRuns(days).map((run) => (
             <path key={run.from} className={`phase-arc phase-${run.phase.toLowerCase()}`}

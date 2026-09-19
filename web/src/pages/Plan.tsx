@@ -68,7 +68,6 @@ function WeekCard({ w, today }: { w: Week; today: string }) {
                 {s.status !== 'PLANNED' && (
                   <small className={`status-tag status-${s.status.toLowerCase()}`}>
                     {s.status === 'COMPLETED' ? 'Done' : s.status === 'PARTIAL' ? 'Cut short' : 'Skipped'}
-                    {s.sessionLoad !== null && <> · load {s.sessionLoad}</>}
                   </small>
                 )}
               </span>
