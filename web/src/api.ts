@@ -1,21 +1,30 @@
-import { loadCurrentUser, saveCurrentUser, type CurrentUser } from './session.ts'
+import { saveCurrentUser, type CurrentUser } from './session.ts'
+
+// Set by App from the Auth0 SDK. Kept as a plain function so non-React code
+// (this module) can reach a token without a hook.
+// The Auth0 SDK resolves to undefined if it can't produce a token, so the
+// header is only attached when there really is one.
+let getToken: (() => Promise<string | undefined>) | null = null
+export const setTokenProvider = (fn: (() => Promise<string | undefined>) | null) => { getToken = fn }
 
 // Thin wrapper around fetch. Vite proxies /api to the Express server, and
-// every request names the current user so the API knows whose data to use.
+// every request carries her Auth0 access token; the API reads whose data to
+// use out of the token, so the browser can't ask for someone else's.
 export async function api<T>(path: string, init?: RequestInit): Promise<T> {
-  const user = loadCurrentUser()
+  const token = getToken ? await getToken() : null
   const res = await fetch(`/api${path}`, {
     ...init,
     headers: {
       'Content-Type': 'application/json',
-      ...(user ? { 'x-user-id': String(user.userId) } : {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...init?.headers,
     },
   })
   const body = await res.json().catch(() => ({}))
-  // The saved user no longer exists (e.g. the demo was reset, which re-creates
-  // Maya with a new id): forget them and go back to the start screen.
-  if (res.status === 404 && user && /^No user/.test(body.error ?? '')) {
+  // No account behind this login yet, or the saved one is gone (the demo
+  // reset re-creates Maya with a new id): go back to the start screen, where
+  // she is still signed in with Auth0 and can onboard.
+  if (res.status === 404 && /^No user/.test(body.error ?? '')) {
     saveCurrentUser(null)
     location.hash = ''
     location.reload()

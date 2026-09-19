@@ -12,6 +12,7 @@ for one demo user with two cycles of history already logged.
 | 3 | `healthher_02_seed.sql` | Demo user Maya Chen with a full history. |
 | 4 | `healthher_03_queries.sql` | Not required — the query cookbook for Parts 1–7. |
 | – | `healthher_04_migrate_session_ratings.sql` | Only for a database built before 2026-09-19 that you want to keep: adds the new columns and tables in place. Then re-run step 3. |
+| – | `healthher_05_auth0.sql` | Only for a database built before Auth0 was added: puts `auth0_sub` on `users`. A fresh run of step 1 already has it, and running this on top will fail with a duplicate column. |
 
 Steps 2 and 3 are safe to re-run. Step 2 drops and recreates only the eight
 HealthHer tables (so every onboarded user loses their profile); step 3 deletes

@@ -1,7 +1,7 @@
-import { randomUUID } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { Router } from 'express';
-import mysql, { type ResultSetHeader } from 'mysql2/promise';
+import mysql, { type ResultSetHeader, type RowDataPacket } from 'mysql2/promise';
+import { bearer, fetchProfile } from '../auth.ts';
 import { daysBetween } from '../core/cycleEngine.ts';
 import { allowedEquipment, EQUIPMENT_ITEMS, exercisesFor } from '../core/planGenerator.ts';
 import { pool } from '../db.ts';
@@ -39,7 +39,7 @@ class BadRequest extends Error {}
 
 // The "see the demo" button: reload Maya from the seed file so her dates
 // line up with today, then save her upcoming plan with learning applied.
-accountRouter.post('/demo/reset', async (_req, res) => {
+accountRouter.post('/demo/reset', async (req, res) => {
   const sql = await readFile(SEED_FILE, 'utf8');
   const conn = await mysql.createConnection({
     host: process.env.DB_HOST ?? 'localhost',
@@ -55,7 +55,12 @@ accountRouter.post('/demo/reset', async (_req, res) => {
     await conn.end();
   }
 
-  const ctx = await loadUser(await demoUserId());
+  // Re-seeding rebuilds Maya's row, which drops the auth0_sub link. Point it
+  // back at whoever is signed in, so the next request resolves to her.
+  const userId = await demoUserId();
+  await pool.query('UPDATE users SET auth0_sub = ? WHERE user_id = ?', [req.auth!.payload.sub, userId]);
+
+  const ctx = await loadUser(userId);
   await refreshUpcomingPlan(ctx);
   res.json({ userId: ctx.userId, firstName: ctx.firstName, isDemo: true });
 });
@@ -177,14 +182,26 @@ accountRouter.post('/onboarding', async (req, res) => {
     throw err;
   }
 
+  // The account belongs to the Auth0 identity that asked for it. Her email
+  // comes from Auth0, not the form, so it can't be claimed by typing it.
+  const sub = req.auth!.payload.sub!;
+  const profile = await fetchProfile(bearer(req));
+  const email = profile.email ?? `${sub.replace(/[^a-zA-Z0-9]/g, '-')}@users.healthher.app`;
+
+  // auth0_sub is UNIQUE: say so plainly rather than failing on the insert.
+  const [existing] = await pool.query<RowDataPacket[]>('SELECT user_id FROM users WHERE auth0_sub = ?', [sub]);
+  if (existing[0]) {
+    res.status(409).json({ error: 'This login already has an account.' });
+    return;
+  }
+
   const conn = await pool.getConnection();
   let userId: number;
   try {
     await conn.beginTransaction();
-    // No login for the hackathon: a placeholder email keeps users.email unique.
     const [user] = await conn.query<ResultSetHeader>(
-      `INSERT INTO users (first_name, email, password, date_of_birth, height_cm) VALUES (?, ?, 'no-login', ?, ?)`,
-      [input.firstName, `guest-${randomUUID()}@healthher.app`, input.dateOfBirth, input.heightCm],
+      `INSERT INTO users (first_name, email, auth0_sub, date_of_birth, height_cm) VALUES (?, ?, ?, ?, ?)`,
+      [input.firstName, email, sub, input.dateOfBirth, input.heightCm],
     );
     userId = user.insertId;
 

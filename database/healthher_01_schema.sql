@@ -40,7 +40,11 @@ CREATE TABLE IF NOT EXISTS users (
     last_name     VARCHAR(50),
 
     email         VARCHAR(255) NOT NULL UNIQUE,
-    password      VARCHAR(255) NOT NULL,
+    -- The `sub` claim from the Auth0 access token, e.g. 'auth0|abc123'. The
+    -- API trusts this and nothing the client sends. NULL for seed/demo rows.
+    auth0_sub     VARCHAR(255) NULL UNIQUE,
+    -- Unused since Auth0: it holds credentials, this app never sees them.
+    password      VARCHAR(255) NULL,
 
     date_of_birth DATE,
     height_cm     DECIMAL(5,2),

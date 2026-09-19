@@ -1,4 +1,6 @@
+import { useAuth0 } from '@auth0/auth0-react'
 import { useEffect, useState, type ReactNode } from 'react'
+import { setTokenProvider } from './api.ts'
 import { Cycle } from './pages/Cycle.tsx'
 import { Insights } from './pages/Insights.tsx'
 import { Landing } from './pages/Landing.tsx'
@@ -32,7 +34,12 @@ const ICONS: Record<keyof typeof TABS | 'settings' | 'switch', ReactNode> = {
 }
 
 function App() {
+  const { isAuthenticated, isLoading, logout, getAccessTokenSilently } = useAuth0()
   const [user, setUser] = useState<CurrentUser | null>(loadCurrentUser)
+
+  // Done during render, not in an effect: child effects run before the
+  // parent's, so a page could fetch before the token provider was set.
+  setTokenProvider(isAuthenticated ? () => getAccessTokenSilently() : null)
   const [onboarding, setOnboarding] = useState(false)
   const [tab, setTab] = useState<Tab>(tabFromHash)
 
@@ -53,6 +60,15 @@ function App() {
     saveCurrentUser(null)
     setUser(null)
     history.replaceState(null, '', location.pathname)
+    // Signed in with Auth0: end that session too, or the next visitor lands
+    // back on this account without being asked for credentials.
+    if (isAuthenticated) logout({ logoutParams: { returnTo: location.origin } })
+  }
+
+  // The SDK reads the existing session before it can say who is signed in.
+  // Waiting avoids a flash of the landing page on every reload.
+  if (isLoading) {
+    return <main className="narrow"><p className="muted">Loading…</p></main>
   }
 
   if (!user) {

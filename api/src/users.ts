@@ -1,8 +1,8 @@
 // Loads a user's profile and sessions in the shapes the core modules take.
-// No auth for the hackathon: the client names its user in the x-user-id
-// header, and requests without one act as the demo user (Maya).
+// Who is asking comes from the verified Auth0 token (see resolveUser).
 import type { NextFunction, Request, Response } from 'express';
 import type { RowDataPacket } from 'mysql2';
+import { bearer, fetchProfile } from './auth.ts';
 import { computeCycle, holdIfLate } from './core/cycleEngine.ts';
 import { learnedPattern, type LearnedPattern, type LoggedSession } from './core/learning.ts';
 import { ageOn } from './core/nutrition.ts';
@@ -26,11 +26,51 @@ export async function demoUserId(): Promise<number> {
   return rows[0].user_id;
 }
 
-/** Express middleware: puts the requesting user's id on res.locals.userId. */
+/**
+ * Express middleware: maps the verified Auth0 `sub` to a HealthHer user and
+ * puts the id on res.locals.userId. Mount it after requireAuth.
+ *
+ * Nothing the client sends is trusted here. The old x-user-id header is
+ * gone: it let anyone read anyone's cycle data by changing a number.
+ */
 export async function resolveUser(req: Request, res: Response, next: NextFunction) {
-  const header = req.header('x-user-id');
-  res.locals.userId = header && /^\d+$/.test(header) ? Number(header) : await demoUserId();
-  next();
+  const sub = req.auth?.payload.sub;
+  if (!sub) {
+    res.status(401).json({ error: 'Not signed in' });
+    return;
+  }
+  res.locals.auth0Sub = sub;
+
+  const [linked] = await pool.query<RowDataPacket[]>('SELECT user_id FROM users WHERE auth0_sub = ?', [sub]);
+  if (linked[0]) {
+    res.locals.userId = linked[0].user_id;
+    next();
+    return;
+  }
+
+  // First time we've seen this Auth0 identity. If her verified email already
+  // has an account with no login attached — the seeded demo user, or a row
+  // from before Auth0 — adopt it rather than stranding her data.
+  //
+  // Verified only: adopting on an unverified email would let anyone who
+  // signs up as demo@healthher.app walk into that account.
+  const profile = await fetchProfile(bearer(req));
+  if (profile.email && profile.emailVerified) {
+    const [match] = await pool.query<RowDataPacket[]>(
+      'SELECT user_id FROM users WHERE email = ? AND auth0_sub IS NULL',
+      [profile.email],
+    );
+    if (match[0]) {
+      await pool.query('UPDATE users SET auth0_sub = ? WHERE user_id = ?', [sub, match[0].user_id]);
+      res.locals.userId = match[0].user_id;
+      next();
+      return;
+    }
+  }
+
+  // Signed in, but no HealthHer account yet. The web app treats a "No user"
+  // 404 as "go back to the start screen", where onboarding builds one.
+  throw new NotFoundError('No user account for this login yet. Start onboarding.');
 }
 
 export interface UserContext {
