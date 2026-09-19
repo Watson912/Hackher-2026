@@ -46,3 +46,68 @@ export interface Today {
     status: string
   } | null
 }
+
+export type CycleWeek = 1 | 2 | 3 | 4
+export type Intensity = 'LOW' | 'MODERATE' | 'HIGH'
+
+export interface WeekPattern {
+  week: CycleWeek
+  label: string
+  shortLabel: string
+  sessions: number
+  avgEnergy: number | null
+  textbookEnergy: number
+  energyDelta: number | null
+  effortDelta: number | null
+  completionPct: number | null
+  confidence: number
+  adjustment: number
+  reason: string | null
+}
+
+export interface SessionSpec {
+  sessionType: string
+  intensity: Intensity
+  durationMin: number
+  focus: string
+}
+
+export interface PlannedSession extends SessionSpec {
+  date: string
+  cycleDay: number | null
+  phase: Phase
+  week: CycleWeek | null
+  slot: 'STRENGTH' | 'CARDIO' | 'MOBILITY'
+  textbook: SessionSpec
+  adjustment: number
+  adjusted: boolean
+}
+
+export interface WeekPlan {
+  weekStart: string
+  cycleDayAtStart: number | null
+  phase: Phase
+  textbookIntensityModifier: number
+  intensityModifier: number
+  personalAdjustment: number
+  nutritionNotes: string
+  adjustmentReason: string | null
+  sessions: PlannedSession[]
+}
+
+export interface TimelinePoint {
+  date: string
+  sessions: number
+  confidence: number
+  adjustment: number
+}
+
+export interface Insights {
+  today: string
+  loggedSessions: number
+  weeks: WeekPattern[]
+  headline: WeekPattern | null
+  timeline: TimelinePoint[]
+  nextAdjustedWeek: { start: string; week: CycleWeek } | null
+  preview: WeekPlan | null
+}

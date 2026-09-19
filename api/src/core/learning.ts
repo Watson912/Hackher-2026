@@ -19,6 +19,7 @@ export interface LoggedSession {
 export interface WeekPattern {
   week: CycleWeek;
   label: string;
+  shortLabel: string;            // for chart axes
   sessions: number;              // logged sessions with an energy score
   avgEnergy: number | null;
   textbookEnergy: number;
@@ -76,6 +77,7 @@ export function learnedPattern(sessions: LoggedSession[], asOf: IsoDate, part1Co
     const entry: WeekPattern = {
       week,
       label: textbook.label,
+      shortLabel: textbook.shortLabel,
       sessions: n,
       avgEnergy: avgEnergy === null ? null : round2(avgEnergy),
       textbookEnergy: textbook.expectedEnergy,

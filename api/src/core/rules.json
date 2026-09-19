@@ -4,19 +4,23 @@
     "weeks": {
       "1": {
         "expectedEnergy": 3,
-        "label": "Period week"
+        "label": "Period week",
+        "shortLabel": "Period"
       },
       "2": {
         "expectedEnergy": 4.5,
-        "label": "Building to ovulation"
+        "label": "Building to ovulation",
+        "shortLabel": "Pre-ovulation"
       },
       "3": {
         "expectedEnergy": 4,
-        "label": "Ovulation into early luteal"
+        "label": "Ovulation into early luteal",
+        "shortLabel": "Post-ovulation"
       },
       "4": {
         "expectedEnergy": 2.5,
-        "label": "Late luteal"
+        "label": "Late luteal",
+        "shortLabel": "Pre-period"
       }
     }
   },
