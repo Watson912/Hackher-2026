@@ -1,5 +1,5 @@
 {
-  "name": "healthher",
+  "name": "cyclesync",
   "private": true,
   "scripts": {
     "install:all": "npm install && npm --prefix api install && npm --prefix web install",

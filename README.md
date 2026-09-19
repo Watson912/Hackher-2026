@@ -1,4 +1,4 @@
-# HealthHer — Hackers 2026 @ GSU
+# CycleSync — Hackers 2026 @ GSU
 
 A training app that adapts to the menstrual cycle and shifts toward the
 pattern in her own logs. See [PLAN.md](PLAN.md).

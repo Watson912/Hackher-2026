@@ -85,7 +85,7 @@ function App() {
     <>
       <header className="topbar">
         <div className="topbar-row">
-          <span className="brand"><span className="brand-mark" aria-hidden="true" />HealthHer</span>
+          <span className="brand"><span className="brand-mark" aria-hidden="true" />CycleSync</span>
           <span className="user-chip">
             <span className="avatar" aria-hidden="true">{user.firstName.charAt(0).toUpperCase()}</span>
             <span className="user-name">{user.firstName}</span>

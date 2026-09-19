@@ -27,7 +27,7 @@ export async function demoUserId(): Promise<number> {
 }
 
 /**
- * Express middleware: maps the verified Auth0 `sub` to a HealthHer user and
+ * Express middleware: maps the verified Auth0 `sub` to a CycleSync user and
  * puts the id on res.locals.userId. Mount it after requireAuth.
  *
  * Nothing the client sends is trusted here. The old x-user-id header is
@@ -68,7 +68,7 @@ export async function resolveUser(req: Request, res: Response, next: NextFunctio
     }
   }
 
-  // Signed in, but no HealthHer account yet. The web app treats a "No user"
+  // Signed in, but no CycleSync account yet. The web app treats a "No user"
   // 404 as "go back to the start screen", where onboarding builds one.
   throw new NotFoundError('No user account for this login yet. Start onboarding.');
 }

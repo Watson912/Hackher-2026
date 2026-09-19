@@ -4,7 +4,7 @@ import { resetDemo } from '../api.ts'
 import type { CurrentUser } from '../session.ts'
 
 export function Landing({ onStart, onSignedIn }: { onStart: () => void; onSignedIn: (user: CurrentUser) => void }) {
-  // Auth0 knows who she is; the HealthHer account she trains under is still
+  // Auth0 knows who she is; the CycleSync account she trains under is still
   // created by onboarding below.
   const { isAuthenticated, user: account, loginWithRedirect, logout } = useAuth0()
   const [loading, setLoading] = useState(false)
@@ -24,10 +24,10 @@ export function Landing({ onStart, onSignedIn }: { onStart: () => void; onSigned
   return (
     <div className="landing">
       <div className="landing-glow" aria-hidden="true" />
-      <p className="brand"><span className="brand-mark" aria-hidden="true" />HealthHer</p>
+      <p className="brand"><span className="brand-mark" aria-hidden="true" />CycleSync</p>
       <h1>Training that follows your cycle, and your data.</h1>
       <p className="lede">
-        Fitness plans were built around men's physiology. HealthHer starts from your cycle, then learns what works
+        Fitness plans were built around men's physiology. CycleSync starts from your cycle, then learns what works
         for <em>you</em>.
       </p>
 
