@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import type { CycleState, Phase, WheelDay } from '../api.ts'
-import { monthDay, titleCase } from '../format.ts'
+import { monthDay, phaseLabel, titleCase } from '../format.ts'
 import { useWidth } from '../useWidth.ts'
 
 // The cycle as a clock: day 1 at the top, running clockwise. Inner ring is
 // the phase; radial bars are her training load, with a gray tick where the
 // textbook plan would put it.
-const PHASES: Phase[] = ['MENSTRUAL', 'FOLLICULAR', 'OVULATORY', 'LUTEAL']
+const PHASES: Phase[] = ['MENSTRUAL', 'FOLLICULAR', 'OVULATORY', 'EARLY_LUTEAL', 'LATE_LUTEAL']
 const MAX_SIZE = 420
 const GAP_DEG = 0.8 // surface gap between phase segments, in degrees
 
@@ -66,14 +66,14 @@ export function CycleWheel({ cycle, days }: { cycle: CycleState; days: WheelDay[
   return (
     <figure className="chart wheel">
       <div className="legend wrap" aria-hidden="true">
-        {PHASES.map((p) => <span key={p}><i className={`key key-phase phase-${p.toLowerCase()}`} /> {titleCase(p)}</span>)}
+        {PHASES.map((p) => <span key={p}><i className={`key key-phase phase-${p.toLowerCase()}`} /> {phaseLabel(p)}</span>)}
         <span><i className="key key-bar" /> Your load</span>
         <span><i className="key key-tick" /> Textbook</span>
       </div>
 
       <div className="chart-plot wheel-plot" ref={ref}>
         <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} role="img"
-          aria-label={`Cycle wheel: day ${cycle.cycleDay} of ${n}, ${titleCase(cycle.phase)}. Training load for each day compared with the textbook; see the table below for details.`}>
+          aria-label={`Cycle wheel: day ${cycle.cycleDay} of ${n}, ${phaseLabel(cycle.phase)}. Training load for each day compared with the textbook; see the table below for details.`}>
           {/* phase ring, with a surface gap between phases */}
           {phaseRuns(days).map((run) => (
             <path key={run.from} className={`phase-arc phase-${run.phase.toLowerCase()}`}
@@ -85,7 +85,7 @@ export function CycleWheel({ cycle, days }: { cycle: CycleState; days: WheelDay[
             return (
               <text key={`l${run.from}`} className="axis-label strong" x={x} y={y} dy="0.32em"
                 textAnchor={x < c - 4 ? 'end' : x > c + 4 ? 'start' : 'middle'}>
-                {titleCase(run.phase)}
+                {phaseLabel(run.phase)}
               </text>
             )
           })}
@@ -129,7 +129,7 @@ export function CycleWheel({ cycle, days }: { cycle: CycleState; days: WheelDay[
           <text className="wheel-day" x={c} y={c - 10} textAnchor="middle">
             {cycle.cycleDay !== null ? `Day ${cycle.cycleDay}` : '—'}
           </text>
-          <text className="wheel-phase" x={c} y={c + 14} textAnchor="middle">{titleCase(cycle.phase)}</text>
+          <text className="wheel-phase" x={c} y={c + 14} textAnchor="middle">{phaseLabel(cycle.phase)}</text>
           {cycle.nextPeriodDate && (
             <text className="axis-label" x={c} y={c + 34} textAnchor="middle">Next period {monthDay(cycle.nextPeriodDate)}</text>
           )}
@@ -146,7 +146,7 @@ export function CycleWheel({ cycle, days }: { cycle: CycleState; days: WheelDay[
           return (
             <div className="tooltip" style={{ left: x, top: y }}>
               <strong>Day {hovered.day} · {monthDay(hovered.date)}</strong>
-              <div className="tooltip-note">{titleCase(hovered.phase)}, week {hovered.week}{hovered.isToday ? ' · today' : ''}</div>
+              <div className="tooltip-note">{phaseLabel(hovered.phase)}, week {hovered.week}{hovered.isToday ? ' · today' : ''}</div>
               <div className="tooltip-row"><i className="key key-bar" /> You
                 <b>{hovered.yours ? `${titleCase(hovered.yours.intensity)}, ${hovered.yours.durationMin} min` : 'Rest'}</b></div>
               <div className="tooltip-row"><i className="key key-tick" /> Textbook
@@ -164,7 +164,7 @@ export function CycleWheel({ cycle, days }: { cycle: CycleState; days: WheelDay[
             {days.map((d) => (
               <tr key={d.day}>
                 <td>{d.day}{d.isToday ? ' (today)' : ''}</td>
-                <td>{titleCase(d.phase)}</td>
+                <td>{phaseLabel(d.phase)}</td>
                 <td>{d.yours ? `${d.yours.focus}, ${d.yours.intensity.toLowerCase()}, ${d.yours.durationMin} min` : 'Rest'}</td>
                 <td>{d.textbook ? `${d.textbook.intensity.toLowerCase()}, ${d.textbook.durationMin} min` : 'Rest'}</td>
               </tr>

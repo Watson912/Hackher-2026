@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { PlannedSession, WeekPlan } from '../api.ts'
-import { titleCase, weekday, monthDay } from '../format.ts'
+import { phaseLabel, titleCase, weekday, monthDay } from '../format.ts'
 
 type View = 'textbook' | 'yours'
 
@@ -15,7 +15,7 @@ function Row({ s, view }: { s: PlannedSession; view: View }) {
       </div>
       <div className="session-body">
         <div className="session-focus">{spec.focus}</div>
-        <div className="muted">{spec.durationMin} min · {titleCase(s.phase)}</div>
+        <div className="muted">{spec.durationMin} min · {phaseLabel(s.phase)}</div>
         {changed && (
           <div className="was">
             Textbook: <s>{s.textbook.focus}, {titleCase(s.textbook.intensity).toLowerCase()}, {s.textbook.durationMin} min</s>
@@ -54,11 +54,11 @@ export function PlanCompare({ plan }: { plan: WeekPlan }) {
 
       {view === 'yours' && plan.adjustmentReason && (
         <p className="reason">
-          <strong>{changed} of {plan.sessions.length} sessions changed.</strong> {plan.adjustmentReason}
+          <strong>{changed} of {plan.sessions.length} sessions changed</strong>, based on your logs.
         </p>
       )}
       {view === 'textbook' && (
-        <p className="reason muted">What a standard cycle-synced plan gives everyone on these days.</p>
+        <p className="reason muted">The standard plan for these days.</p>
       )}
     </div>
   )

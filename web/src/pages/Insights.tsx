@@ -1,14 +1,32 @@
 import { useEffect, useState } from 'react'
 import { api, type Insights as InsightsData, type WeekPattern } from '../api.ts'
-import { EnergyChart } from '../components/EnergyChart.tsx'
-import { LearningTimeline } from '../components/LearningTimeline.tsx'
+import { InfoHeading } from '../components/InfoHeading.tsx'
 import { PlanCompare } from '../components/PlanCompare.tsx'
+import { WeekChart, type WeekChartRow } from '../components/WeekChart.tsx'
 import { change, longDate } from '../format.ts'
 
-function headlineText(w: WeekPattern): string {
-  return w.energyDelta! < 0
-    ? `Week ${w.week} hits you harder than the textbook says.`
-    : `You're stronger in week ${w.week} than the textbook says.`
+// Insights: which week of her cycle feels hardest, compared with the
+// default, and what that changed in her plan. One chart, kept short.
+
+const one = (n: number) => n.toFixed(1)
+
+const fatigueRows = (weeks: WeekPattern[]): WeekChartRow[] => weeks.map((w) => ({
+  key: w.week, title: `Week ${w.week} · ${w.label}`, label: `Week ${w.week}`, sublabel: w.shortLabel,
+  yours: w.avgFatigue, reference: w.textbookFatigue, sessions: w.sessions,
+}))
+
+function FatigueChart({ weeks, highlight }: { weeks: WeekPattern[]; highlight: number | null }) {
+  return (
+    <section className="card">
+      <InfoHeading title="How tired you feel, by week" label="this chart">
+        <p>Pink bars are your average tiredness (1 to 7) each week of your cycle. Gray lines are what's typical.</p>
+      </InfoHeading>
+      <WeekChart rows={fatigueRows(weeks)} max={7} ticks={[1, 2, 3, 4, 5, 6, 7]} highlight={highlight}
+        yoursLabel="You" referenceLabel="Typical" format={one} unit="tiredness (1 to 7)"
+        describe={(r) => (r.yours === null || r.reference === null ? null
+          : `${r.yours > r.reference ? '+' : '−'}${one(Math.abs(r.yours - r.reference))}`)} />
+    </section>
+  )
 }
 
 export function Insights() {
@@ -22,52 +40,26 @@ export function Insights() {
   if (error) return <p className="error">Couldn't load insights: {error}</p>
   if (!data) return <p className="muted">Loading…</p>
 
-  const { headline, weeks, timeline, preview, nextAdjustedWeek, loggedSessions, learns, minSessions } = data
+  const { headline, weeks, preview, nextAdjustedWeek, loggedSessions, learns, minSessions, hardest } = data
 
   if (!learns) {
     return (
       <section className="card">
-        <h2>Consistent training, by design</h2>
-        <p className="muted">
-          On hormonal birth control there are no natural phases to learn from, so your plan stays steady week to week.
-          Your energy and effort logs still show you how your training is going.
-        </p>
+        <h2>Steady training</h2>
+        <p className="muted">On hormonal birth control your plan stays consistent week to week.</p>
       </section>
     )
   }
 
   if (!headline) {
-    const ready = weeks.filter((w) => w.sessions >= minSessions)
     return (
       <>
         <section className="hero">
-          <p className="eyebrow">What your body has shown so far</p>
-          <h2>{ready.length === 0 ? 'Still learning your cycle' : 'So far, you match the textbook'}</h2>
-          <p className="muted">
-            {ready.length === 0
-              ? `Once you've logged ${minSessions} sessions in a week of your cycle, that week starts shaping your plan. Every log counts.`
-              : `Across ${loggedSessions} sessions, your weeks line up with the textbook, so your plan follows it. Keep logging and it will follow you.`}
-          </p>
+          <p className="eyebrow">Your insights</p>
+          <h2>{loggedSessions === 0 ? 'Log a few workouts to see your pattern' : 'So far, you match the typical pattern'}</h2>
+          <p className="muted">Each week of your cycle starts shaping your plan after {minSessions} logged workouts.</p>
         </section>
-        <section className="card">
-          <h3>Progress by week of your cycle</h3>
-          <ul className="week-progress">
-            {weeks.map((w) => (
-              <li key={w.week}>
-                <span><b>Week {w.week}</b> <small className="muted">{w.shortLabel}</small></span>
-                <div className="meter"><span style={{ width: `${Math.min(1, w.sessions / minSessions) * 100}%` }} /></div>
-                <small className="muted">{Math.min(w.sessions, minSessions)}/{minSessions}</small>
-              </li>
-            ))}
-          </ul>
-        </section>
-        {loggedSessions > 0 && (
-          <section className="card">
-            <h3>Your energy vs the textbook</h3>
-            <p className="card-sub">Average energy (1–5) by week of your cycle</p>
-            <EnergyChart weeks={weeks} highlight={null} />
-          </section>
-        )}
+        {loggedSessions > 0 && <FatigueChart weeks={weeks} highlight={null} />}
       </>
     )
   }
@@ -75,39 +67,26 @@ export function Insights() {
   return (
     <>
       <section className="hero">
-        <p className="eyebrow">What your body showed</p>
-        <h2>{headlineText(headline)}</h2>
-        <p className="muted">
-          Your energy in week {headline.week} ({headline.label.toLowerCase()}) averages{' '}
-          <b>{headline.avgEnergy?.toFixed(1)}</b> out of 5. The textbook expects <b>{headline.textbookEnergy.toFixed(1)}</b>.
-          {headline.effortDelta !== null && headline.effortDelta > 1 &&
-            ` Sessions that week also felt ${headline.effortDelta.toFixed(1)} points harder than planned.`}
-        </p>
+        <p className="eyebrow">Your data suggests</p>
+        <h2>
+          {hardest.hers !== null && hardest.hers !== hardest.textbook
+            ? `Week ${hardest.hers} is your hardest week, not week ${hardest.textbook}.`
+            : `Week ${headline.week} feels different for you.`}
+        </h2>
+        <p className="muted">So your week {headline.week} is now {change(headline.adjustment)}.</p>
       </section>
 
-      <section className="card">
-        <h3>Your energy vs the textbook</h3>
-        <p className="card-sub">Average energy (1–5) by week of your cycle</p>
-        <EnergyChart weeks={weeks} highlight={headline.week} />
-      </section>
+      <FatigueChart weeks={weeks} highlight={headline.week} />
 
       {preview && nextAdjustedWeek && (
         <section className="card">
-          <p className="eyebrow">What you changed</p>
-          <h3>Week {nextAdjustedWeek.week} is now {change(headline.adjustment)}</h3>
-          <p className="card-sub">Your next week {nextAdjustedWeek.week} starts {longDate(nextAdjustedWeek.start)}</p>
+          <p className="eyebrow">What changed</p>
+          <h3>Your next week {nextAdjustedWeek.week}, from {longDate(nextAdjustedWeek.start)}</h3>
           <PlanCompare plan={preview} />
         </section>
       )}
 
-      <section className="card">
-        <p className="eyebrow">How you got here</p>
-        <h3>From textbook to yours</h3>
-        <p className="card-sub">How much your logs have adjusted week {headline.week}, one session at a time</p>
-        <LearningTimeline points={timeline} week={headline.week} />
-      </section>
-
-      <p className="footnote muted">Based on {loggedSessions} logged sessions.</p>
+      <p className="footnote muted">Based on the {loggedSessions} workouts you've logged. An experiment of one, run on your own numbers.</p>
     </>
   )
 }

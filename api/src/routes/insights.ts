@@ -1,24 +1,28 @@
 import { Router } from 'express';
 import { addDays, daysBetween, dayInfo } from '../core/cycleEngine.ts';
-import { learnedPattern, WEEKS, type WeekPattern } from '../core/learning.ts';
+import { byPhase, hardestWeeks, learnedPattern, WEEKS, type WeekPattern } from '../core/learning.ts';
 import { generateWeek, planBlocks } from '../core/planGenerator.ts';
 import rules from '../core/rules.json' with { type: 'json' };
 import { loadUser } from '../users.ts';
 
 export const insightsRouter = Router();
 
-// Part 7: what we learned, and what we changed because of it.
+const PHASES = ['MENSTRUAL', 'FOLLICULAR', 'OVULATORY', 'EARLY_LUTEAL', 'LATE_LUTEAL'] as const;
+
+// Insights (SPEC.md): her session load (RPE x minutes) and fatigue by cycle
+// week and phase against the default pattern, whether her hardest-feeling
+// week looks like the default's, and what that changed in her plan.
 insightsRouter.get('/insights', async (_req, res) => {
-  const { today, goal, daysPerWeek, cycleInput, cycle, sessions, pattern } = await loadUser(res.locals.userId);
+  const { today, goal, daysPerWeek, cycleInput, cycle, sessions, pattern, athlete } = await loadUser(res.locals.userId);
   const weeks = WEEKS.map((w) => pattern[w]);
   const logged = sessions.filter((s) => s.status !== 'PLANNED');
 
-  // The headline is the week that differs most from the textbook, among
-  // weeks with enough sessions to trust and a gap big enough to act on.
-  const trusted = weeks.filter((w) => w.sessions >= rules.learning.minSessions && w.energyDelta !== null
-    && Math.abs(w.energyDelta) >= rules.learning.threshold);
+  // The week that differs most from the default, among weeks with enough
+  // sessions to trust and a gap big enough to act on.
+  const trusted = weeks.filter((w) => w.sessions >= rules.learning.minSessions && w.fatigueDelta !== null
+    && Math.abs(w.fatigueDelta) >= rules.learning.threshold);
   const headline: WeekPattern | null =
-    [...trusted].sort((a, b) => Math.abs(b.energyDelta!) - Math.abs(a.energyDelta!))[0] ?? null;
+    [...trusted].sort((a, b) => Math.abs(b.fatigueDelta!) - Math.abs(a.fatigueDelta!))[0] ?? null;
 
   // How the app's read on the headline week built up, one point per week
   // from her first logged session to today.
@@ -45,7 +49,7 @@ insightsRouter.get('/insights', async (_req, res) => {
 
   const block = nextAdjustedWeek && planBlocks(cycleInput, nextAdjustedWeek.start, nextAdjustedWeek.start)[0];
   const preview = block
-    ? generateWeek({ cycle: cycleInput, weekStart: block.start, length: block.length, goal, daysPerWeek, pattern })
+    ? generateWeek({ cycle: cycleInput, weekStart: block.start, length: block.length, goal, daysPerWeek, pattern, athlete })
     : null;
 
   const learns = cycle.phase !== 'SUPPRESSED' && cycle.phase !== 'UNKNOWN';
@@ -53,8 +57,11 @@ insightsRouter.get('/insights', async (_req, res) => {
     today,
     learns,
     minSessions: rules.learning.minSessions,
+    threshold: rules.learning.threshold,
     loggedSessions: logged.length,
     weeks,
+    phases: byPhase(sessions, today, [...PHASES]),
+    hardest: hardestWeeks(pattern),
     headline,
     timeline,
     nextAdjustedWeek,

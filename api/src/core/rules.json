@@ -1,84 +1,42 @@
 {
   "textbook": {
-    "description": "What research says the average cycle looks like. Energy is lowest on her period, peaks around ovulation, holds up through week 3, then dips before the next period. The learning layer compares her logs against these numbers. Keep in sync with database/README.md and healthher_03_queries.sql section 7.",
+    "description": "What the default (textbook) pattern expects a cycle to feel like, as the Hooper Index fatigue item (1 = very, very low, 7 = very, very high). It mirrors where phaseRules.json puts the heavy and light work: fresh through the follicular peak, most fatigued in the late luteal deload week. These are the app's modelling assumption, not measured values. The learning layer compares her logged fatigue against them.",
     "weeks": {
       "1": {
-        "expectedEnergy": 3,
+        "expectedFatigue": 3.5,
         "label": "Period week",
         "shortLabel": "Period"
       },
       "2": {
-        "expectedEnergy": 4.5,
+        "expectedFatigue": 2.5,
         "label": "Building to ovulation",
         "shortLabel": "Pre-ovulation"
       },
       "3": {
-        "expectedEnergy": 4,
+        "expectedFatigue": 3,
         "label": "Ovulation into early luteal",
         "shortLabel": "Post-ovulation"
       },
       "4": {
-        "expectedEnergy": 2.5,
+        "expectedFatigue": 4.5,
         "label": "Late luteal",
         "shortLabel": "Pre-period"
       }
     }
   },
-  "phases": {
-    "MENSTRUAL": {
-      "intensityModifier": 0.8,
-      "volumeModifier": 0.75,
-      "nutrition": "Iron-rich foods (red meat, lentils, spinach) to offset menstrual losses. Anti-inflammatory fats. Do not cut calories this week."
-    },
-    "FOLLICULAR": {
-      "intensityModifier": 1,
-      "volumeModifier": 1.05,
-      "nutrition": "Carb tolerance is highest now. Push carbs around training and add volume to protein. Best week to attempt progressive overload."
-    },
-    "OVULATORY": {
-      "intensityModifier": 1.1,
-      "volumeModifier": 1,
-      "nutrition": "Peak strength window. Keep hydration and electrolytes up, ligaments are laxer so warm up longer before heavy lifts."
-    },
-    "LUTEAL": {
-      "intensityModifier": 0.9,
-      "volumeModifier": 0.9,
-      "nutrition": "Metabolism runs slightly hotter, add roughly 100-200 kcal. Magnesium and complex carbs help with cravings and sleep."
-    },
-    "LUTEAL_LATE": {
-      "intensityModifier": 0.75,
-      "volumeModifier": 0.7,
-      "nutrition": "Late luteal deload. Protein high, salt moderate to limit bloating. Expect lower energy, this is planned, not a setback."
-    },
-    "SUPPRESSED": {
-      "intensityModifier": 0.95,
-      "volumeModifier": 1,
-      "nutrition": "Hormonal birth control keeps hormones steady, so training stays consistent week to week. Keep protein high and fuel sessions evenly."
-    },
-    "UNKNOWN": {
-      "intensityModifier": 0.95,
-      "volumeModifier": 1,
-      "nutrition": "Log your next period start so the plan can adapt to your cycle."
-    }
-  },
   "expectedEffort": {
-    "description": "RPE (1-10) a session at this intensity should feel like.",
-    "LOW": 4,
-    "MODERATE": 6,
-    "HIGH": 8
+    "description": "Session RPE (Borg CR-10, Foster session-RPE method) a session at this planned intensity is meant to feel like: 3 moderate, 5 hard, 7 very hard. Used for the planned session load (RPE x minutes) she is compared against.",
+    "LOW": 3,
+    "MODERATE": 5,
+    "HIGH": 7
   },
   "learning": {
-    "description": "See PLAN.md, Learning layer. Only energy moves the plan.",
-    "threshold": 0.5,
-    "slope": 0.2,
+    "description": "See PLAN.md, Learning layer. Only fatigue moves the plan: it is rated independently of what was prescribed, so dialing a week down does not erase the evidence that moved it. Session RPE and load are shown alongside as a check.",
+    "threshold": 1,
+    "slope": 0.15,
     "maxAdjustment": 0.2,
     "minSessions": 3,
     "fullConfidenceSessions": 6
-  },
-  "intensityThresholds": {
-    "description": "Final modifier (phase + personal adjustment) to intensity bucket.",
-    "HIGH": 0.98,
-    "MODERATE": 0.85
   },
   "trainingDays": {
     "1": [
@@ -172,59 +130,5 @@
       "STRENGTH",
       "CARDIO"
     ]
-  },
-  "sessions": {
-    "description": "What each slot looks like at each intensity. Duration is scaled by the volume modifier.",
-    "STRENGTH": {
-      "HIGH": {
-        "type": "STRENGTH",
-        "focus": "Heavy compound lifts",
-        "minutes": 60
-      },
-      "MODERATE": {
-        "type": "STRENGTH",
-        "focus": "Full body strength - volume",
-        "minutes": 55
-      },
-      "LOW": {
-        "type": "STRENGTH",
-        "focus": "Light technique work",
-        "minutes": 45
-      }
-    },
-    "CARDIO": {
-      "HIGH": {
-        "type": "CARDIO_HIIT",
-        "focus": "Intervals 6x400m",
-        "minutes": 35
-      },
-      "MODERATE": {
-        "type": "CARDIO_LISS",
-        "focus": "Steady state cardio",
-        "minutes": 45
-      },
-      "LOW": {
-        "type": "CARDIO_LISS",
-        "focus": "Easy zone 2 walk/jog",
-        "minutes": 40
-      }
-    },
-    "MOBILITY": {
-      "HIGH": {
-        "type": "MOBILITY",
-        "focus": "Yoga + mobility",
-        "minutes": 30
-      },
-      "MODERATE": {
-        "type": "MOBILITY",
-        "focus": "Yoga + mobility",
-        "minutes": 30
-      },
-      "LOW": {
-        "type": "MOBILITY",
-        "focus": "Yoga + mobility",
-        "minutes": 30
-      }
-    }
   }
 }

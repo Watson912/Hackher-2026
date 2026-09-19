@@ -1,0 +1,2195 @@
+{
+  "meta": {
+    "version": 1,
+    "equipmentProfile": "full_gym | dumbbells_home | bodyweight",
+    "notes": "Sets and reps are NOT stored here. They come from phaseRules.intensity x exercise.category so the same library works across all four phases and all four goals.",
+    "equipmentTiers": {
+      "full_gym": "All exercises.",
+      "dumbbells_home": "Allowed equipment: dumbbell, kettlebell, bench, adjustable_bench, plate, plyo_box, ab_wheel, mat, none.",
+      "bodyweight": "Allowed equipment: none, mat, bench (for incline push-ups; optional)."
+    }
+  },
+  "exercises": [
+    {
+      "id": "back_squat",
+      "name": "Back Squat",
+      "muscleGroup": "legs",
+      "pattern": "squat",
+      "category": "compound",
+      "equipment": [
+        "barbell",
+        "squat_rack"
+      ],
+      "difficulty": 3,
+      "formCue": "Brace before you unrack. Knees track over mid-foot, chest stays up out of the hole.",
+      "goals": [
+        "strength",
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "front_squat",
+        "hack_squat",
+        "goblet_squat"
+      ],
+      "loadBasis": {
+        "type": "bodyweight_multiple",
+        "novice": 0.6,
+        "intermediate": 1.0
+      }
+    },
+    {
+      "id": "front_squat",
+      "name": "Front Squat",
+      "muscleGroup": "legs",
+      "pattern": "squat",
+      "category": "compound",
+      "equipment": [
+        "barbell",
+        "squat_rack"
+      ],
+      "difficulty": 4,
+      "formCue": "Elbows high the whole time. If they drop, the bar rolls forward.",
+      "goals": [
+        "strength",
+        "general"
+      ],
+      "swaps": [
+        "back_squat",
+        "goblet_squat",
+        "hack_squat"
+      ],
+      "loadBasis": {
+        "type": "bodyweight_multiple",
+        "novice": 0.45,
+        "intermediate": 0.8
+      }
+    },
+    {
+      "id": "hack_squat",
+      "name": "Hack Squat",
+      "muscleGroup": "legs",
+      "pattern": "squat",
+      "category": "compound",
+      "equipment": [
+        "hack_squat_machine"
+      ],
+      "difficulty": 2,
+      "formCue": "Full foot pressure, no heel lift. Control the descent rather than dropping into it.",
+      "goals": [
+        "strength",
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "leg_press",
+        "back_squat"
+      ],
+      "loadBasis": {
+        "type": "machine",
+        "novice": null
+      }
+    },
+    {
+      "id": "goblet_squat",
+      "name": "Goblet Squat",
+      "muscleGroup": "legs",
+      "pattern": "squat",
+      "category": "accessory",
+      "equipment": [
+        "dumbbell"
+      ],
+      "difficulty": 1,
+      "formCue": "Hold the bell tight to your chest. Elbows brush the inside of your knees at the bottom.",
+      "goals": [
+        "leaner",
+        "general",
+        "endurance"
+      ],
+      "swaps": [
+        "back_squat",
+        "leg_press"
+      ],
+      "loadBasis": {
+        "type": "absolute_kg",
+        "novice": 12
+      }
+    },
+    {
+      "id": "leg_press",
+      "name": "Leg Press",
+      "muscleGroup": "legs",
+      "pattern": "squat",
+      "category": "accessory",
+      "equipment": [
+        "leg_press_machine"
+      ],
+      "difficulty": 1,
+      "formCue": "Stop before your lower back rounds off the pad. Don't lock the knees hard at the top.",
+      "goals": [
+        "strength",
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "hack_squat",
+        "goblet_squat"
+      ],
+      "loadBasis": {
+        "type": "machine",
+        "novice": null
+      }
+    },
+    {
+      "id": "conventional_deadlift",
+      "name": "Conventional Deadlift",
+      "muscleGroup": "posterior_chain",
+      "pattern": "hinge",
+      "category": "compound",
+      "equipment": [
+        "barbell"
+      ],
+      "difficulty": 4,
+      "formCue": "Bar against the shins, take the slack out of the bar before you pull, then push the floor away.",
+      "goals": [
+        "strength",
+        "general"
+      ],
+      "swaps": [
+        "trap_bar_deadlift",
+        "romanian_deadlift",
+        "hip_thrust"
+      ],
+      "loadBasis": {
+        "type": "bodyweight_multiple",
+        "novice": 0.8,
+        "intermediate": 1.3
+      }
+    },
+    {
+      "id": "trap_bar_deadlift",
+      "name": "Trap Bar Deadlift",
+      "muscleGroup": "posterior_chain",
+      "pattern": "hinge",
+      "category": "compound",
+      "equipment": [
+        "trap_bar"
+      ],
+      "difficulty": 2,
+      "formCue": "Easier on the lower back than a straight bar. Stand tall, don't shrug at the top.",
+      "goals": [
+        "strength",
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "conventional_deadlift",
+        "romanian_deadlift"
+      ],
+      "loadBasis": {
+        "type": "bodyweight_multiple",
+        "novice": 0.85,
+        "intermediate": 1.4
+      }
+    },
+    {
+      "id": "romanian_deadlift",
+      "name": "Romanian Deadlift",
+      "muscleGroup": "posterior_chain",
+      "pattern": "hinge",
+      "category": "compound",
+      "equipment": [
+        "barbell"
+      ],
+      "difficulty": 3,
+      "formCue": "Push the hips back, not down. Stop when you feel the hamstrings load, not when the bar hits the floor.",
+      "goals": [
+        "strength",
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "conventional_deadlift",
+        "seated_leg_curl",
+        "hip_thrust"
+      ],
+      "loadBasis": {
+        "type": "bodyweight_multiple",
+        "novice": 0.5,
+        "intermediate": 0.9
+      }
+    },
+    {
+      "id": "hip_thrust",
+      "name": "Barbell Hip Thrust",
+      "muscleGroup": "posterior_chain",
+      "pattern": "hinge",
+      "category": "compound",
+      "equipment": [
+        "barbell",
+        "bench",
+        "hip_thrust_pad"
+      ],
+      "difficulty": 2,
+      "formCue": "Tuck the ribs down and finish with the glutes, not by arching the lower back.",
+      "goals": [
+        "strength",
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "romanian_deadlift",
+        "glute_bridge_machine"
+      ],
+      "loadBasis": {
+        "type": "bodyweight_multiple",
+        "novice": 0.6,
+        "intermediate": 1.2
+      }
+    },
+    {
+      "id": "glute_bridge_machine",
+      "name": "Glute Drive Machine",
+      "muscleGroup": "posterior_chain",
+      "pattern": "hinge",
+      "category": "accessory",
+      "equipment": [
+        "glute_machine"
+      ],
+      "difficulty": 1,
+      "formCue": "Pause a beat at the top of every rep rather than bouncing through.",
+      "goals": [
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "hip_thrust"
+      ],
+      "loadBasis": {
+        "type": "machine",
+        "novice": null
+      }
+    },
+    {
+      "id": "bulgarian_split_squat",
+      "name": "Bulgarian Split Squat",
+      "muscleGroup": "legs",
+      "pattern": "lunge",
+      "category": "accessory",
+      "equipment": [
+        "dumbbell",
+        "bench"
+      ],
+      "difficulty": 3,
+      "formCue": "Most of the weight on the front leg. Back foot is a kickstand, not a second squat.",
+      "goals": [
+        "strength",
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "walking_lunge",
+        "reverse_lunge",
+        "step_up"
+      ],
+      "loadBasis": {
+        "type": "absolute_kg",
+        "novice": 8
+      }
+    },
+    {
+      "id": "reverse_lunge",
+      "name": "Reverse Lunge",
+      "muscleGroup": "legs",
+      "pattern": "lunge",
+      "category": "accessory",
+      "equipment": [
+        "dumbbell"
+      ],
+      "difficulty": 2,
+      "formCue": "Step back and down, front shin close to vertical. Knee-friendlier than stepping forward.",
+      "goals": [
+        "leaner",
+        "general",
+        "endurance"
+      ],
+      "swaps": [
+        "walking_lunge",
+        "bulgarian_split_squat",
+        "step_up"
+      ],
+      "loadBasis": {
+        "type": "absolute_kg",
+        "novice": 8
+      }
+    },
+    {
+      "id": "walking_lunge",
+      "name": "Walking Lunge",
+      "muscleGroup": "legs",
+      "pattern": "lunge",
+      "category": "accessory",
+      "equipment": [
+        "dumbbell"
+      ],
+      "difficulty": 2,
+      "formCue": "Long enough stride that the front knee stays over the ankle, not past the toes.",
+      "goals": [
+        "leaner",
+        "endurance",
+        "general"
+      ],
+      "swaps": [
+        "reverse_lunge",
+        "step_up"
+      ],
+      "loadBasis": {
+        "type": "absolute_kg",
+        "novice": 8
+      }
+    },
+    {
+      "id": "step_up",
+      "name": "Dumbbell Step-Up",
+      "muscleGroup": "legs",
+      "pattern": "lunge",
+      "category": "accessory",
+      "equipment": [
+        "dumbbell",
+        "plyo_box"
+      ],
+      "difficulty": 2,
+      "formCue": "Drive through the top foot. Don't push off the floor with the trailing leg.",
+      "goals": [
+        "leaner",
+        "endurance",
+        "general"
+      ],
+      "swaps": [
+        "reverse_lunge",
+        "bulgarian_split_squat"
+      ],
+      "loadBasis": {
+        "type": "absolute_kg",
+        "novice": 8
+      }
+    },
+    {
+      "id": "seated_leg_curl",
+      "name": "Seated Leg Curl",
+      "muscleGroup": "hamstrings",
+      "pattern": "isolation",
+      "category": "accessory",
+      "equipment": [
+        "leg_curl_machine"
+      ],
+      "difficulty": 1,
+      "formCue": "Keep hips pinned to the seat. Slow on the way back out.",
+      "goals": [
+        "strength",
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "lying_leg_curl",
+        "nordic_curl",
+        "romanian_deadlift"
+      ],
+      "loadBasis": {
+        "type": "machine",
+        "novice": null
+      }
+    },
+    {
+      "id": "lying_leg_curl",
+      "name": "Lying Leg Curl",
+      "muscleGroup": "hamstrings",
+      "pattern": "isolation",
+      "category": "accessory",
+      "equipment": [
+        "leg_curl_machine"
+      ],
+      "difficulty": 1,
+      "formCue": "Hips stay down on the pad. Don't let them pop up to finish the rep.",
+      "goals": [
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "seated_leg_curl",
+        "nordic_curl"
+      ],
+      "loadBasis": {
+        "type": "machine",
+        "novice": null
+      }
+    },
+    {
+      "id": "nordic_curl",
+      "name": "Nordic Hamstring Curl",
+      "muscleGroup": "hamstrings",
+      "pattern": "isolation",
+      "category": "accessory",
+      "equipment": [
+        "nordic_bench"
+      ],
+      "difficulty": 4,
+      "formCue": "Lower as slowly as you can control, catch with your hands, push back up. Strong hamstring injury protection.",
+      "goals": [
+        "strength",
+        "endurance"
+      ],
+      "swaps": [
+        "seated_leg_curl",
+        "romanian_deadlift"
+      ],
+      "loadBasis": {
+        "type": "bodyweight",
+        "novice": null
+      }
+    },
+    {
+      "id": "leg_extension",
+      "name": "Leg Extension",
+      "muscleGroup": "quads",
+      "pattern": "isolation",
+      "category": "accessory",
+      "equipment": [
+        "leg_extension_machine"
+      ],
+      "difficulty": 1,
+      "formCue": "Pause at the top, control the return. No swinging the weight up.",
+      "goals": [
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "leg_press",
+        "goblet_squat"
+      ],
+      "loadBasis": {
+        "type": "machine",
+        "novice": null
+      }
+    },
+    {
+      "id": "standing_calf_raise",
+      "name": "Standing Calf Raise",
+      "muscleGroup": "calves",
+      "pattern": "isolation",
+      "category": "accessory",
+      "equipment": [
+        "calf_machine"
+      ],
+      "difficulty": 1,
+      "formCue": "Full stretch at the bottom, full squeeze at the top. Slow, not bouncy.",
+      "goals": [
+        "strength",
+        "leaner",
+        "general",
+        "endurance"
+      ],
+      "swaps": [
+        "seated_calf_raise"
+      ],
+      "loadBasis": {
+        "type": "machine",
+        "novice": null
+      }
+    },
+    {
+      "id": "seated_calf_raise",
+      "name": "Seated Calf Raise",
+      "muscleGroup": "calves",
+      "pattern": "isolation",
+      "category": "accessory",
+      "equipment": [
+        "seated_calf_machine"
+      ],
+      "difficulty": 1,
+      "formCue": "Knees bent shifts the work to the soleus. Hold the top for a full second.",
+      "goals": [
+        "leaner",
+        "general",
+        "endurance"
+      ],
+      "swaps": [
+        "standing_calf_raise"
+      ],
+      "loadBasis": {
+        "type": "machine",
+        "novice": null
+      }
+    },
+    {
+      "id": "barbell_bench_press",
+      "name": "Barbell Bench Press",
+      "muscleGroup": "chest",
+      "pattern": "horizontal_push",
+      "category": "compound",
+      "equipment": [
+        "barbell",
+        "bench",
+        "squat_rack"
+      ],
+      "difficulty": 3,
+      "formCue": "Shoulder blades pinned back and down. Bar touches the lower chest, not the throat.",
+      "goals": [
+        "strength",
+        "general"
+      ],
+      "swaps": [
+        "dumbbell_bench_press",
+        "machine_chest_press",
+        "incline_bench_press"
+      ],
+      "loadBasis": {
+        "type": "bodyweight_multiple",
+        "novice": 0.35,
+        "intermediate": 0.6
+      }
+    },
+    {
+      "id": "incline_bench_press",
+      "name": "Incline Dumbbell Press",
+      "muscleGroup": "chest",
+      "pattern": "horizontal_push",
+      "category": "compound",
+      "equipment": [
+        "dumbbell",
+        "adjustable_bench"
+      ],
+      "difficulty": 2,
+      "formCue": "Bench around 30 degrees. Higher than that turns it into a shoulder press.",
+      "goals": [
+        "strength",
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "barbell_bench_press",
+        "machine_chest_press"
+      ],
+      "loadBasis": {
+        "type": "absolute_kg",
+        "novice": 8
+      }
+    },
+    {
+      "id": "dumbbell_bench_press",
+      "name": "Flat Dumbbell Press",
+      "muscleGroup": "chest",
+      "pattern": "horizontal_push",
+      "category": "compound",
+      "equipment": [
+        "dumbbell",
+        "bench"
+      ],
+      "difficulty": 2,
+      "formCue": "Elbows about 45 degrees from the body, not flared straight out.",
+      "goals": [
+        "strength",
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "barbell_bench_press",
+        "machine_chest_press"
+      ],
+      "loadBasis": {
+        "type": "absolute_kg",
+        "novice": 8
+      }
+    },
+    {
+      "id": "machine_chest_press",
+      "name": "Machine Chest Press",
+      "muscleGroup": "chest",
+      "pattern": "horizontal_push",
+      "category": "accessory",
+      "equipment": [
+        "chest_press_machine"
+      ],
+      "difficulty": 1,
+      "formCue": "Set the seat so the handles line up with mid-chest. Good option when you're training alone.",
+      "goals": [
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "dumbbell_bench_press",
+        "cable_fly"
+      ],
+      "loadBasis": {
+        "type": "machine",
+        "novice": null
+      }
+    },
+    {
+      "id": "cable_fly",
+      "name": "Cable Fly",
+      "muscleGroup": "chest",
+      "pattern": "isolation",
+      "category": "accessory",
+      "equipment": [
+        "cable_machine"
+      ],
+      "difficulty": 1,
+      "formCue": "Slight elbow bend held constant. Think about hugging, not pressing.",
+      "goals": [
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "machine_chest_press",
+        "pec_deck"
+      ],
+      "loadBasis": {
+        "type": "machine",
+        "novice": null
+      }
+    },
+    {
+      "id": "pec_deck",
+      "name": "Pec Deck",
+      "muscleGroup": "chest",
+      "pattern": "isolation",
+      "category": "accessory",
+      "equipment": [
+        "pec_deck_machine"
+      ],
+      "difficulty": 1,
+      "formCue": "Squeeze and hold for a beat at the middle of every rep.",
+      "goals": [
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "cable_fly"
+      ],
+      "loadBasis": {
+        "type": "machine",
+        "novice": null
+      }
+    },
+    {
+      "id": "overhead_press",
+      "name": "Standing Overhead Press",
+      "muscleGroup": "shoulders",
+      "pattern": "vertical_push",
+      "category": "compound",
+      "equipment": [
+        "barbell",
+        "squat_rack"
+      ],
+      "difficulty": 3,
+      "formCue": "Squeeze the glutes to stop the lower back arching. Finish with the bar over the ears.",
+      "goals": [
+        "strength",
+        "general"
+      ],
+      "swaps": [
+        "seated_dumbbell_press",
+        "machine_shoulder_press"
+      ],
+      "loadBasis": {
+        "type": "bodyweight_multiple",
+        "novice": 0.25,
+        "intermediate": 0.45
+      }
+    },
+    {
+      "id": "seated_dumbbell_press",
+      "name": "Seated Dumbbell Press",
+      "muscleGroup": "shoulders",
+      "pattern": "vertical_push",
+      "category": "compound",
+      "equipment": [
+        "dumbbell",
+        "adjustable_bench"
+      ],
+      "difficulty": 2,
+      "formCue": "Back supported, press slightly forward of straight up rather than behind the head.",
+      "goals": [
+        "strength",
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "overhead_press",
+        "machine_shoulder_press"
+      ],
+      "loadBasis": {
+        "type": "absolute_kg",
+        "novice": 6
+      }
+    },
+    {
+      "id": "machine_shoulder_press",
+      "name": "Machine Shoulder Press",
+      "muscleGroup": "shoulders",
+      "pattern": "vertical_push",
+      "category": "accessory",
+      "equipment": [
+        "shoulder_press_machine"
+      ],
+      "difficulty": 1,
+      "formCue": "Don't shrug the shoulders up to finish the press.",
+      "goals": [
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "seated_dumbbell_press"
+      ],
+      "loadBasis": {
+        "type": "machine",
+        "novice": null
+      }
+    },
+    {
+      "id": "lateral_raise",
+      "name": "Dumbbell Lateral Raise",
+      "muscleGroup": "shoulders",
+      "pattern": "isolation",
+      "category": "accessory",
+      "equipment": [
+        "dumbbell"
+      ],
+      "difficulty": 1,
+      "formCue": "Lead with the elbows, stop at shoulder height. Light weight does the job here.",
+      "goals": [
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "cable_lateral_raise",
+        "rear_delt_fly"
+      ],
+      "loadBasis": {
+        "type": "absolute_kg",
+        "novice": 4
+      }
+    },
+    {
+      "id": "cable_lateral_raise",
+      "name": "Cable Lateral Raise",
+      "muscleGroup": "shoulders",
+      "pattern": "isolation",
+      "category": "accessory",
+      "equipment": [
+        "cable_machine"
+      ],
+      "difficulty": 2,
+      "formCue": "Cable from the low pulley behind you keeps tension through the whole range.",
+      "goals": [
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "lateral_raise"
+      ],
+      "loadBasis": {
+        "type": "machine",
+        "novice": null
+      }
+    },
+    {
+      "id": "rear_delt_fly",
+      "name": "Rear Delt Fly",
+      "muscleGroup": "shoulders",
+      "pattern": "isolation",
+      "category": "accessory",
+      "equipment": [
+        "dumbbell",
+        "adjustable_bench"
+      ],
+      "difficulty": 1,
+      "formCue": "Hinge over, thumbs turned slightly down, pull the elbows out and back.",
+      "goals": [
+        "strength",
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "face_pull",
+        "cable_lateral_raise"
+      ],
+      "loadBasis": {
+        "type": "absolute_kg",
+        "novice": 4
+      }
+    },
+    {
+      "id": "pull_up",
+      "name": "Pull-Up",
+      "muscleGroup": "back",
+      "pattern": "vertical_pull",
+      "category": "compound",
+      "equipment": [
+        "pull_up_bar",
+        "assist_machine"
+      ],
+      "difficulty": 4,
+      "formCue": "Start from a dead hang, pull the elbows to the ribs. Use the assist machine rather than kipping.",
+      "goals": [
+        "strength",
+        "general"
+      ],
+      "swaps": [
+        "lat_pulldown",
+        "assisted_pull_up"
+      ],
+      "loadBasis": {
+        "type": "bodyweight",
+        "novice": null
+      }
+    },
+    {
+      "id": "assisted_pull_up",
+      "name": "Assisted Pull-Up",
+      "muscleGroup": "back",
+      "pattern": "vertical_pull",
+      "category": "compound",
+      "equipment": [
+        "assist_machine"
+      ],
+      "difficulty": 2,
+      "formCue": "Set assistance so the last rep is hard but clean. Reduce it a little each cycle.",
+      "goals": [
+        "strength",
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "lat_pulldown",
+        "pull_up"
+      ],
+      "loadBasis": {
+        "type": "bodyweight_assisted",
+        "novice": null
+      }
+    },
+    {
+      "id": "lat_pulldown",
+      "name": "Lat Pulldown",
+      "muscleGroup": "back",
+      "pattern": "vertical_pull",
+      "category": "compound",
+      "equipment": [
+        "cable_machine"
+      ],
+      "difficulty": 1,
+      "formCue": "Pull the bar to the collarbone with the chest up. Don't lean way back.",
+      "goals": [
+        "strength",
+        "leaner",
+        "general",
+        "endurance"
+      ],
+      "swaps": [
+        "assisted_pull_up",
+        "pull_up"
+      ],
+      "loadBasis": {
+        "type": "machine",
+        "novice": null
+      }
+    },
+    {
+      "id": "barbell_row",
+      "name": "Barbell Row",
+      "muscleGroup": "back",
+      "pattern": "horizontal_pull",
+      "category": "compound",
+      "equipment": [
+        "barbell"
+      ],
+      "difficulty": 3,
+      "formCue": "Hinge to about 45 degrees and hold it. Row to the belly button, not the chest.",
+      "goals": [
+        "strength",
+        "general"
+      ],
+      "swaps": [
+        "seated_cable_row",
+        "dumbbell_row",
+        "chest_supported_row"
+      ],
+      "loadBasis": {
+        "type": "bodyweight_multiple",
+        "novice": 0.4,
+        "intermediate": 0.7
+      }
+    },
+    {
+      "id": "dumbbell_row",
+      "name": "Single-Arm Dumbbell Row",
+      "muscleGroup": "back",
+      "pattern": "horizontal_pull",
+      "category": "compound",
+      "equipment": [
+        "dumbbell",
+        "bench"
+      ],
+      "difficulty": 2,
+      "formCue": "Don't let the torso twist to help the weight up. Pull with the back, not the arm.",
+      "goals": [
+        "strength",
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "seated_cable_row",
+        "chest_supported_row"
+      ],
+      "loadBasis": {
+        "type": "absolute_kg",
+        "novice": 10
+      }
+    },
+    {
+      "id": "chest_supported_row",
+      "name": "Chest-Supported Row",
+      "muscleGroup": "back",
+      "pattern": "horizontal_pull",
+      "category": "accessory",
+      "equipment": [
+        "row_machine"
+      ],
+      "difficulty": 1,
+      "formCue": "Chest stays on the pad. Takes the lower back out of it entirely.",
+      "goals": [
+        "strength",
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "seated_cable_row",
+        "dumbbell_row"
+      ],
+      "loadBasis": {
+        "type": "machine",
+        "novice": null
+      }
+    },
+    {
+      "id": "seated_cable_row",
+      "name": "Seated Cable Row",
+      "muscleGroup": "back",
+      "pattern": "horizontal_pull",
+      "category": "accessory",
+      "equipment": [
+        "cable_machine"
+      ],
+      "difficulty": 1,
+      "formCue": "Squeeze the shoulder blades together at the end of the pull, then let them travel forward on the way out.",
+      "goals": [
+        "leaner",
+        "general",
+        "endurance"
+      ],
+      "swaps": [
+        "chest_supported_row",
+        "dumbbell_row"
+      ],
+      "loadBasis": {
+        "type": "machine",
+        "novice": null
+      }
+    },
+    {
+      "id": "face_pull",
+      "name": "Face Pull",
+      "muscleGroup": "back",
+      "pattern": "isolation",
+      "category": "accessory",
+      "equipment": [
+        "cable_machine",
+        "rope_attachment"
+      ],
+      "difficulty": 1,
+      "formCue": "Rope to the forehead, elbows high, external rotation at the end. Cheap shoulder insurance.",
+      "goals": [
+        "strength",
+        "leaner",
+        "general",
+        "endurance"
+      ],
+      "swaps": [
+        "rear_delt_fly"
+      ],
+      "loadBasis": {
+        "type": "machine",
+        "novice": null
+      }
+    },
+    {
+      "id": "barbell_curl",
+      "name": "Barbell Curl",
+      "muscleGroup": "biceps",
+      "pattern": "isolation",
+      "category": "accessory",
+      "equipment": [
+        "barbell"
+      ],
+      "difficulty": 1,
+      "formCue": "Elbows stay at your sides. If your shoulders are swinging, go lighter.",
+      "goals": [
+        "strength",
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "dumbbell_curl",
+        "cable_curl",
+        "hammer_curl"
+      ],
+      "loadBasis": {
+        "type": "absolute_kg",
+        "novice": 10
+      }
+    },
+    {
+      "id": "dumbbell_curl",
+      "name": "Dumbbell Curl",
+      "muscleGroup": "biceps",
+      "pattern": "isolation",
+      "category": "accessory",
+      "equipment": [
+        "dumbbell"
+      ],
+      "difficulty": 1,
+      "formCue": "Turn the pinky up slightly as you curl to finish the contraction.",
+      "goals": [
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "barbell_curl",
+        "hammer_curl",
+        "cable_curl"
+      ],
+      "loadBasis": {
+        "type": "absolute_kg",
+        "novice": 5
+      }
+    },
+    {
+      "id": "hammer_curl",
+      "name": "Hammer Curl",
+      "muscleGroup": "biceps",
+      "pattern": "isolation",
+      "category": "accessory",
+      "equipment": [
+        "dumbbell"
+      ],
+      "difficulty": 1,
+      "formCue": "Neutral grip throughout. Usually kinder to the wrists than a straight bar.",
+      "goals": [
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "dumbbell_curl",
+        "cable_curl"
+      ],
+      "loadBasis": {
+        "type": "absolute_kg",
+        "novice": 5
+      }
+    },
+    {
+      "id": "cable_curl",
+      "name": "Cable Curl",
+      "muscleGroup": "biceps",
+      "pattern": "isolation",
+      "category": "accessory",
+      "equipment": [
+        "cable_machine"
+      ],
+      "difficulty": 1,
+      "formCue": "Constant tension, so control the lowering phase rather than letting the stack drop.",
+      "goals": [
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "dumbbell_curl",
+        "barbell_curl"
+      ],
+      "loadBasis": {
+        "type": "machine",
+        "novice": null
+      }
+    },
+    {
+      "id": "tricep_pushdown",
+      "name": "Tricep Pushdown",
+      "muscleGroup": "triceps",
+      "pattern": "isolation",
+      "category": "accessory",
+      "equipment": [
+        "cable_machine",
+        "rope_attachment"
+      ],
+      "difficulty": 1,
+      "formCue": "Upper arms locked to your sides, only the forearms move.",
+      "goals": [
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "overhead_tricep_extension",
+        "dip"
+      ],
+      "loadBasis": {
+        "type": "machine",
+        "novice": null
+      }
+    },
+    {
+      "id": "overhead_tricep_extension",
+      "name": "Overhead Tricep Extension",
+      "muscleGroup": "triceps",
+      "pattern": "isolation",
+      "category": "accessory",
+      "equipment": [
+        "dumbbell",
+        "cable_machine"
+      ],
+      "difficulty": 2,
+      "formCue": "Elbows point forward and stay put. Full stretch at the bottom is the point.",
+      "goals": [
+        "strength",
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "tricep_pushdown",
+        "close_grip_bench"
+      ],
+      "loadBasis": {
+        "type": "absolute_kg",
+        "novice": 8
+      }
+    },
+    {
+      "id": "close_grip_bench",
+      "name": "Close-Grip Bench Press",
+      "muscleGroup": "triceps",
+      "pattern": "horizontal_push",
+      "category": "compound",
+      "equipment": [
+        "barbell",
+        "bench"
+      ],
+      "difficulty": 3,
+      "formCue": "Hands about shoulder width, elbows tucked in. Not a narrow grip, that wrecks wrists.",
+      "goals": [
+        "strength",
+        "general"
+      ],
+      "swaps": [
+        "dip",
+        "overhead_tricep_extension"
+      ],
+      "loadBasis": {
+        "type": "bodyweight_multiple",
+        "novice": 0.3,
+        "intermediate": 0.5
+      }
+    },
+    {
+      "id": "dip",
+      "name": "Assisted Dip",
+      "muscleGroup": "triceps",
+      "pattern": "vertical_push",
+      "category": "compound",
+      "equipment": [
+        "assist_machine",
+        "dip_bars"
+      ],
+      "difficulty": 3,
+      "formCue": "Stay fairly upright for triceps, lean forward for more chest. Stop at shoulder-height depth.",
+      "goals": [
+        "strength",
+        "general"
+      ],
+      "swaps": [
+        "close_grip_bench",
+        "tricep_pushdown"
+      ],
+      "loadBasis": {
+        "type": "bodyweight_assisted",
+        "novice": null
+      }
+    },
+    {
+      "id": "plank",
+      "name": "Plank",
+      "muscleGroup": "core",
+      "pattern": "anti_extension",
+      "category": "accessory",
+      "equipment": [
+        "none"
+      ],
+      "difficulty": 1,
+      "formCue": "Ribs down, glutes on, straight line ear to heel. Quality over duration.",
+      "goals": [
+        "strength",
+        "leaner",
+        "general",
+        "endurance"
+      ],
+      "swaps": [
+        "dead_bug",
+        "ab_wheel"
+      ],
+      "loadBasis": {
+        "type": "time",
+        "novice": null
+      }
+    },
+    {
+      "id": "dead_bug",
+      "name": "Dead Bug",
+      "muscleGroup": "core",
+      "pattern": "anti_extension",
+      "category": "accessory",
+      "equipment": [
+        "none"
+      ],
+      "difficulty": 1,
+      "formCue": "Lower back stays flat on the floor the entire time. If it arches, shorten the range.",
+      "goals": [
+        "general",
+        "endurance",
+        "leaner"
+      ],
+      "swaps": [
+        "plank",
+        "hollow_hold"
+      ],
+      "loadBasis": {
+        "type": "bodyweight",
+        "novice": null
+      }
+    },
+    {
+      "id": "ab_wheel",
+      "name": "Ab Wheel Rollout",
+      "muscleGroup": "core",
+      "pattern": "anti_extension",
+      "category": "accessory",
+      "equipment": [
+        "ab_wheel"
+      ],
+      "difficulty": 3,
+      "formCue": "Roll out only as far as you can keep the hips tucked. Range grows over weeks.",
+      "goals": [
+        "strength",
+        "general"
+      ],
+      "swaps": [
+        "plank",
+        "hollow_hold"
+      ],
+      "loadBasis": {
+        "type": "bodyweight",
+        "novice": null
+      }
+    },
+    {
+      "id": "hollow_hold",
+      "name": "Hollow Hold",
+      "muscleGroup": "core",
+      "pattern": "anti_extension",
+      "category": "accessory",
+      "equipment": [
+        "none"
+      ],
+      "difficulty": 2,
+      "formCue": "Press the lower back into the floor first, then lift. Bend the knees to make it easier.",
+      "goals": [
+        "strength",
+        "general",
+        "endurance"
+      ],
+      "swaps": [
+        "dead_bug",
+        "plank"
+      ],
+      "loadBasis": {
+        "type": "time",
+        "novice": null
+      }
+    },
+    {
+      "id": "pallof_press",
+      "name": "Pallof Press",
+      "muscleGroup": "core",
+      "pattern": "anti_rotation",
+      "category": "accessory",
+      "equipment": [
+        "cable_machine"
+      ],
+      "difficulty": 1,
+      "formCue": "Resist the twist. The rep is not letting the cable rotate you.",
+      "goals": [
+        "strength",
+        "general",
+        "endurance"
+      ],
+      "swaps": [
+        "suitcase_carry",
+        "plank"
+      ],
+      "loadBasis": {
+        "type": "machine",
+        "novice": null
+      }
+    },
+    {
+      "id": "suitcase_carry",
+      "name": "Suitcase Carry",
+      "muscleGroup": "core",
+      "pattern": "anti_lateral_flexion",
+      "category": "accessory",
+      "equipment": [
+        "dumbbell",
+        "kettlebell"
+      ],
+      "difficulty": 1,
+      "formCue": "Heavy weight one side, walk tall without leaning. Shoulders stay level.",
+      "goals": [
+        "strength",
+        "general",
+        "endurance"
+      ],
+      "swaps": [
+        "pallof_press",
+        "farmers_carry"
+      ],
+      "loadBasis": {
+        "type": "absolute_kg",
+        "novice": 16
+      }
+    },
+    {
+      "id": "farmers_carry",
+      "name": "Farmer's Carry",
+      "muscleGroup": "core",
+      "pattern": "carry",
+      "category": "accessory",
+      "equipment": [
+        "dumbbell",
+        "kettlebell"
+      ],
+      "difficulty": 1,
+      "formCue": "Both sides loaded, brace and walk. Grip usually fails before anything else.",
+      "goals": [
+        "strength",
+        "endurance",
+        "general"
+      ],
+      "swaps": [
+        "suitcase_carry"
+      ],
+      "loadBasis": {
+        "type": "absolute_kg",
+        "novice": 12
+      }
+    },
+    {
+      "id": "rowing_intervals",
+      "name": "Rowing Intervals",
+      "muscleGroup": "conditioning",
+      "pattern": "conditioning",
+      "category": "conditioning",
+      "equipment": [
+        "rowing_machine"
+      ],
+      "difficulty": 2,
+      "formCue": "Legs, then back, then arms. Reverse that order on the recovery.",
+      "goals": [
+        "endurance",
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "bike_intervals",
+        "incline_treadmill_walk"
+      ],
+      "loadBasis": {
+        "type": "time",
+        "novice": null
+      }
+    },
+    {
+      "id": "bike_intervals",
+      "name": "Bike Intervals",
+      "muscleGroup": "conditioning",
+      "pattern": "conditioning",
+      "category": "conditioning",
+      "equipment": [
+        "stationary_bike"
+      ],
+      "difficulty": 1,
+      "formCue": "Low impact and easy to control effort, so this is the safe default for hard intervals.",
+      "goals": [
+        "endurance",
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "rowing_intervals",
+        "stair_climber"
+      ],
+      "loadBasis": {
+        "type": "time",
+        "novice": null
+      }
+    },
+    {
+      "id": "incline_treadmill_walk",
+      "name": "Incline Treadmill Walk",
+      "muscleGroup": "conditioning",
+      "pattern": "conditioning",
+      "category": "conditioning",
+      "equipment": [
+        "treadmill"
+      ],
+      "difficulty": 1,
+      "formCue": "Steady pace you could hold a conversation at. Don't hold the handrails.",
+      "goals": [
+        "endurance",
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "stair_climber",
+        "bike_intervals"
+      ],
+      "loadBasis": {
+        "type": "time",
+        "novice": null
+      }
+    },
+    {
+      "id": "stair_climber",
+      "name": "Stair Climber",
+      "muscleGroup": "conditioning",
+      "pattern": "conditioning",
+      "category": "conditioning",
+      "equipment": [
+        "stair_machine"
+      ],
+      "difficulty": 2,
+      "formCue": "Stand tall, full steps. Leaning on the rails turns it into nothing.",
+      "goals": [
+        "endurance",
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "incline_treadmill_walk",
+        "bike_intervals"
+      ],
+      "loadBasis": {
+        "type": "time",
+        "novice": null
+      }
+    },
+    {
+      "id": "tempo_run",
+      "name": "Tempo Run",
+      "muscleGroup": "conditioning",
+      "pattern": "conditioning",
+      "category": "conditioning",
+      "equipment": [
+        "treadmill",
+        "track"
+      ],
+      "difficulty": 3,
+      "formCue": "Comfortably hard, around the pace you could hold for an hour.",
+      "goals": [
+        "endurance"
+      ],
+      "swaps": [
+        "rowing_intervals",
+        "bike_intervals"
+      ],
+      "loadBasis": {
+        "type": "time",
+        "novice": null
+      }
+    },
+    {
+      "id": "mobility_flow",
+      "name": "Mobility Flow",
+      "muscleGroup": "recovery",
+      "pattern": "mobility",
+      "category": "recovery",
+      "equipment": [
+        "mat"
+      ],
+      "difficulty": 1,
+      "formCue": "Hips, thoracic spine, ankles. Move through range slowly, don't force end range.",
+      "goals": [
+        "strength",
+        "leaner",
+        "endurance",
+        "general"
+      ],
+      "swaps": [
+        "easy_walk"
+      ],
+      "loadBasis": {
+        "type": "time",
+        "novice": null
+      }
+    },
+    {
+      "id": "easy_walk",
+      "name": "Easy Walk",
+      "muscleGroup": "recovery",
+      "pattern": "mobility",
+      "category": "recovery",
+      "equipment": [
+        "none"
+      ],
+      "difficulty": 1,
+      "formCue": "Genuinely easy. This is recovery, not a hidden workout.",
+      "goals": [
+        "strength",
+        "leaner",
+        "endurance",
+        "general"
+      ],
+      "swaps": [
+        "mobility_flow"
+      ],
+      "loadBasis": {
+        "type": "time",
+        "novice": null
+      }
+    },
+    {
+      "id": "db_romanian_deadlift",
+      "name": "Dumbbell Romanian Deadlift",
+      "muscleGroup": "posterior_chain",
+      "pattern": "hinge",
+      "category": "compound",
+      "equipment": [
+        "dumbbell"
+      ],
+      "difficulty": 2,
+      "formCue": "Push the hips back with the bells close to your legs. Stop when the hamstrings load, not when the bells hit the floor.",
+      "goals": [
+        "strength",
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "romanian_deadlift",
+        "single_leg_rdl",
+        "db_hip_thrust"
+      ],
+      "loadBasis": {
+        "type": "absolute_kg",
+        "novice": 10
+      }
+    },
+    {
+      "id": "db_hip_thrust",
+      "name": "Dumbbell Hip Thrust",
+      "muscleGroup": "posterior_chain",
+      "pattern": "hinge",
+      "category": "compound",
+      "equipment": [
+        "dumbbell",
+        "bench"
+      ],
+      "difficulty": 2,
+      "formCue": "Bell across the hips, shoulders on the bench. Tuck the ribs and finish with the glutes.",
+      "goals": [
+        "strength",
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "hip_thrust",
+        "glute_bridge",
+        "db_romanian_deadlift"
+      ],
+      "loadBasis": {
+        "type": "absolute_kg",
+        "novice": 12
+      }
+    },
+    {
+      "id": "single_leg_rdl",
+      "name": "Single-Leg Romanian Deadlift",
+      "muscleGroup": "hamstrings",
+      "pattern": "hinge",
+      "category": "accessory",
+      "equipment": [
+        "dumbbell"
+      ],
+      "difficulty": 3,
+      "formCue": "Hips square to the floor the whole way down. Go lighter than you think, this is a balance exercise too.",
+      "goals": [
+        "strength",
+        "endurance",
+        "general"
+      ],
+      "swaps": [
+        "db_romanian_deadlift",
+        "seated_leg_curl"
+      ],
+      "loadBasis": {
+        "type": "absolute_kg",
+        "novice": 6
+      }
+    },
+    {
+      "id": "db_floor_press",
+      "name": "Dumbbell Floor Press",
+      "muscleGroup": "chest",
+      "pattern": "horizontal_push",
+      "category": "compound",
+      "equipment": [
+        "dumbbell"
+      ],
+      "difficulty": 2,
+      "formCue": "Upper arms stop when they touch the floor. Shoulder-friendly and needs no bench.",
+      "goals": [
+        "strength",
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "dumbbell_bench_press",
+        "push_up",
+        "incline_push_up"
+      ],
+      "loadBasis": {
+        "type": "absolute_kg",
+        "novice": 8
+      }
+    },
+    {
+      "id": "db_pullover",
+      "name": "Dumbbell Pullover",
+      "muscleGroup": "back",
+      "pattern": "vertical_pull",
+      "category": "accessory",
+      "equipment": [
+        "dumbbell",
+        "bench"
+      ],
+      "difficulty": 2,
+      "formCue": "One bell held over the chest, lower back behind the head with a slight elbow bend. Stretch, don't yank.",
+      "goals": [
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "lat_pulldown",
+        "dumbbell_row"
+      ],
+      "loadBasis": {
+        "type": "absolute_kg",
+        "novice": 8
+      }
+    },
+    {
+      "id": "renegade_row",
+      "name": "Renegade Row",
+      "muscleGroup": "back",
+      "pattern": "horizontal_pull",
+      "category": "accessory",
+      "equipment": [
+        "dumbbell"
+      ],
+      "difficulty": 3,
+      "formCue": "Plank on the bells, row one at a time. Widen your feet to stop the hips rocking.",
+      "goals": [
+        "strength",
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "dumbbell_row",
+        "inverted_row"
+      ],
+      "loadBasis": {
+        "type": "absolute_kg",
+        "novice": 6
+      }
+    },
+    {
+      "id": "db_skull_crusher",
+      "name": "Dumbbell Skull Crusher",
+      "muscleGroup": "triceps",
+      "pattern": "isolation",
+      "category": "accessory",
+      "equipment": [
+        "dumbbell",
+        "bench"
+      ],
+      "difficulty": 2,
+      "formCue": "Elbows stay pointed at the ceiling. Only the forearms move.",
+      "goals": [
+        "strength",
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "overhead_tricep_extension",
+        "db_kickback",
+        "tricep_pushdown"
+      ],
+      "loadBasis": {
+        "type": "absolute_kg",
+        "novice": 5
+      }
+    },
+    {
+      "id": "db_kickback",
+      "name": "Dumbbell Tricep Kickback",
+      "muscleGroup": "triceps",
+      "pattern": "isolation",
+      "category": "accessory",
+      "equipment": [
+        "dumbbell"
+      ],
+      "difficulty": 1,
+      "formCue": "Upper arm pinned parallel to the floor. Straighten fully and hold for a beat.",
+      "goals": [
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "db_skull_crusher",
+        "tricep_pushdown"
+      ],
+      "loadBasis": {
+        "type": "absolute_kg",
+        "novice": 4
+      }
+    },
+    {
+      "id": "heels_elevated_squat",
+      "name": "Heels-Elevated Dumbbell Squat",
+      "muscleGroup": "quads",
+      "pattern": "squat",
+      "category": "accessory",
+      "equipment": [
+        "dumbbell",
+        "plate"
+      ],
+      "difficulty": 2,
+      "formCue": "Heels on a small plate shifts the work to the quads and helps if your ankles are stiff.",
+      "goals": [
+        "strength",
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "goblet_squat",
+        "leg_extension",
+        "bodyweight_squat"
+      ],
+      "loadBasis": {
+        "type": "absolute_kg",
+        "novice": 10
+      }
+    },
+    {
+      "id": "db_thruster",
+      "name": "Dumbbell Thruster",
+      "muscleGroup": "conditioning",
+      "pattern": "conditioning",
+      "category": "conditioning",
+      "equipment": [
+        "dumbbell"
+      ],
+      "difficulty": 3,
+      "formCue": "Squat then press in one motion. Brutal conditioning, keep the weight modest.",
+      "goals": [
+        "endurance",
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "bike_intervals",
+        "burpee"
+      ],
+      "loadBasis": {
+        "type": "absolute_kg",
+        "novice": 6
+      }
+    },
+    {
+      "id": "push_up",
+      "name": "Push-Up",
+      "muscleGroup": "chest",
+      "pattern": "horizontal_push",
+      "category": "compound",
+      "equipment": [
+        "none"
+      ],
+      "difficulty": 2,
+      "formCue": "Straight line ear to heel. Hands just outside the shoulders, elbows about 45 degrees.",
+      "goals": [
+        "strength",
+        "leaner",
+        "endurance",
+        "general"
+      ],
+      "swaps": [
+        "incline_push_up",
+        "db_floor_press",
+        "dumbbell_bench_press"
+      ],
+      "loadBasis": {
+        "type": "bodyweight",
+        "novice": null
+      }
+    },
+    {
+      "id": "incline_push_up",
+      "name": "Incline Push-Up",
+      "muscleGroup": "chest",
+      "pattern": "horizontal_push",
+      "category": "accessory",
+      "equipment": [
+        "bench"
+      ],
+      "difficulty": 1,
+      "formCue": "Hands on a bench or step. The higher the surface, the easier. Best way to build to a full push-up.",
+      "goals": [
+        "leaner",
+        "endurance",
+        "general"
+      ],
+      "swaps": [
+        "push_up",
+        "db_floor_press"
+      ],
+      "loadBasis": {
+        "type": "bodyweight",
+        "novice": null
+      }
+    },
+    {
+      "id": "inverted_row",
+      "name": "Inverted Row",
+      "muscleGroup": "back",
+      "pattern": "horizontal_pull",
+      "category": "compound",
+      "equipment": [
+        "barbell",
+        "squat_rack"
+      ],
+      "difficulty": 2,
+      "formCue": "Bar set at hip height, body straight, pull the chest to the bar. Walk the feet in to make it easier.",
+      "goals": [
+        "strength",
+        "leaner",
+        "endurance",
+        "general"
+      ],
+      "swaps": [
+        "dumbbell_row",
+        "seated_cable_row",
+        "renegade_row"
+      ],
+      "loadBasis": {
+        "type": "bodyweight",
+        "novice": null
+      }
+    },
+    {
+      "id": "prone_y_raise",
+      "name": "Prone Y Raise",
+      "muscleGroup": "back",
+      "pattern": "isolation",
+      "category": "accessory",
+      "equipment": [
+        "mat"
+      ],
+      "difficulty": 1,
+      "formCue": "Face down, arms in a Y, lift just the hands off the floor. Small movement, upper back does the work.",
+      "goals": [
+        "leaner",
+        "endurance",
+        "general"
+      ],
+      "swaps": [
+        "face_pull",
+        "rear_delt_fly"
+      ],
+      "loadBasis": {
+        "type": "bodyweight",
+        "novice": null
+      }
+    },
+    {
+      "id": "glute_bridge",
+      "name": "Glute Bridge",
+      "muscleGroup": "posterior_chain",
+      "pattern": "hinge",
+      "category": "accessory",
+      "equipment": [
+        "mat"
+      ],
+      "difficulty": 1,
+      "formCue": "Heels close to the glutes, drive through the heels, squeeze at the top. Ribs stay down.",
+      "goals": [
+        "leaner",
+        "endurance",
+        "general"
+      ],
+      "swaps": [
+        "db_hip_thrust",
+        "hip_thrust",
+        "single_leg_glute_bridge"
+      ],
+      "loadBasis": {
+        "type": "bodyweight",
+        "novice": null
+      }
+    },
+    {
+      "id": "single_leg_glute_bridge",
+      "name": "Single-Leg Glute Bridge",
+      "muscleGroup": "posterior_chain",
+      "pattern": "hinge",
+      "category": "accessory",
+      "equipment": [
+        "mat"
+      ],
+      "difficulty": 2,
+      "formCue": "One foot planted, other knee hugged in. Keep the hips level as you lift.",
+      "goals": [
+        "strength",
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "glute_bridge",
+        "db_hip_thrust"
+      ],
+      "loadBasis": {
+        "type": "bodyweight",
+        "novice": null
+      }
+    },
+    {
+      "id": "bodyweight_squat",
+      "name": "Bodyweight Squat",
+      "muscleGroup": "legs",
+      "pattern": "squat",
+      "category": "accessory",
+      "equipment": [
+        "none"
+      ],
+      "difficulty": 1,
+      "formCue": "Sit back and down, chest up, full depth if your ankles allow it.",
+      "goals": [
+        "leaner",
+        "endurance",
+        "general"
+      ],
+      "swaps": [
+        "goblet_squat",
+        "heels_elevated_squat",
+        "bodyweight_split_squat"
+      ],
+      "loadBasis": {
+        "type": "bodyweight",
+        "novice": null
+      }
+    },
+    {
+      "id": "bodyweight_split_squat",
+      "name": "Bodyweight Split Squat",
+      "muscleGroup": "legs",
+      "pattern": "lunge",
+      "category": "accessory",
+      "equipment": [
+        "none"
+      ],
+      "difficulty": 2,
+      "formCue": "Long stance, drop the back knee straight down. Hold something light for balance if needed.",
+      "goals": [
+        "leaner",
+        "endurance",
+        "general"
+      ],
+      "swaps": [
+        "reverse_lunge",
+        "bulgarian_split_squat",
+        "bodyweight_squat"
+      ],
+      "loadBasis": {
+        "type": "bodyweight",
+        "novice": null
+      }
+    },
+    {
+      "id": "wall_sit",
+      "name": "Wall Sit",
+      "muscleGroup": "quads",
+      "pattern": "squat",
+      "category": "accessory",
+      "equipment": [
+        "none"
+      ],
+      "difficulty": 1,
+      "formCue": "Thighs parallel, back flat on the wall. Hold for time, breathe normally.",
+      "goals": [
+        "endurance",
+        "general"
+      ],
+      "swaps": [
+        "bodyweight_squat",
+        "leg_extension"
+      ],
+      "loadBasis": {
+        "type": "time",
+        "novice": null
+      }
+    },
+    {
+      "id": "bw_calf_raise",
+      "name": "Bodyweight Calf Raise",
+      "muscleGroup": "calves",
+      "pattern": "isolation",
+      "category": "accessory",
+      "equipment": [
+        "none"
+      ],
+      "difficulty": 1,
+      "formCue": "Off a step if you have one, for the full stretch. Slow down on the way back.",
+      "goals": [
+        "leaner",
+        "endurance",
+        "general"
+      ],
+      "swaps": [
+        "standing_calf_raise",
+        "seated_calf_raise"
+      ],
+      "loadBasis": {
+        "type": "bodyweight",
+        "novice": null
+      }
+    },
+    {
+      "id": "bird_dog",
+      "name": "Bird Dog",
+      "muscleGroup": "core",
+      "pattern": "anti_rotation",
+      "category": "accessory",
+      "equipment": [
+        "mat"
+      ],
+      "difficulty": 1,
+      "formCue": "Opposite arm and leg, hips stay square. Slow beats far.",
+      "goals": [
+        "strength",
+        "endurance",
+        "general"
+      ],
+      "swaps": [
+        "dead_bug",
+        "pallof_press"
+      ],
+      "loadBasis": {
+        "type": "bodyweight",
+        "novice": null
+      }
+    },
+    {
+      "id": "side_plank",
+      "name": "Side Plank",
+      "muscleGroup": "core",
+      "pattern": "anti_lateral_flexion",
+      "category": "accessory",
+      "equipment": [
+        "mat"
+      ],
+      "difficulty": 2,
+      "formCue": "Stack the feet, push the bottom hip up. Drop to the knee to make it easier.",
+      "goals": [
+        "strength",
+        "leaner",
+        "endurance",
+        "general"
+      ],
+      "swaps": [
+        "plank",
+        "suitcase_carry"
+      ],
+      "loadBasis": {
+        "type": "time",
+        "novice": null
+      }
+    },
+    {
+      "id": "mountain_climber",
+      "name": "Mountain Climber",
+      "muscleGroup": "conditioning",
+      "pattern": "conditioning",
+      "category": "conditioning",
+      "equipment": [
+        "none"
+      ],
+      "difficulty": 2,
+      "formCue": "Plank position, drive the knees in. Hips stay low, don't let them ride up.",
+      "goals": [
+        "endurance",
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "burpee",
+        "bike_intervals"
+      ],
+      "loadBasis": {
+        "type": "time",
+        "novice": null
+      }
+    },
+    {
+      "id": "burpee",
+      "name": "Burpee",
+      "muscleGroup": "conditioning",
+      "pattern": "conditioning",
+      "category": "conditioning",
+      "equipment": [
+        "none"
+      ],
+      "difficulty": 3,
+      "formCue": "Step back instead of jumping back to lower the impact. Still works.",
+      "goals": [
+        "endurance",
+        "leaner",
+        "general"
+      ],
+      "swaps": [
+        "mountain_climber",
+        "db_thruster",
+        "rowing_intervals"
+      ],
+      "loadBasis": {
+        "type": "time",
+        "novice": null
+      }
+    }
+  ]
+}

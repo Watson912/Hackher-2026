@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api, type Wheel } from '../api.ts'
 import { CycleWheel } from '../components/CycleWheel.tsx'
+import { InfoHeading } from '../components/InfoHeading.tsx'
 
 export function Cycle() {
   const [data, setData] = useState<Wheel | null>(null)
@@ -32,15 +33,13 @@ export function Cycle() {
     <>
       <section className="hero">
         <p className="eyebrow">Your cycle</p>
-        <h2>{data.cycle.cycleLength}-day cycle, mapped</h2>
-        <p className="muted">
-          Training load for every day of this cycle.{' '}
-          {adjustedDays > 0
-            ? `Your bars differ from the textbook ticks on ${adjustedDays} days: that's where your own logs changed the plan.`
-            : 'Right now your plan follows the textbook. It will shift as your logs reveal your pattern.'}
-        </p>
+        <h2>Your {data.cycle.cycleLength}-day cycle</h2>
+        <p className="muted">How hard each day of your cycle trains.</p>
       </section>
       <section className="card">
+        <InfoHeading title="How to read the wheel" label="the cycle wheel">
+          <p>Day 1 is at the top. Longer pink bars are harder days. Gray ticks are the standard plan{adjustedDays > 0 ? ', so gaps show where your logs changed it' : ''}.</p>
+        </InfoHeading>
         <CycleWheel cycle={data.cycle} days={data.days} />
       </section>
     </>

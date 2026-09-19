@@ -11,7 +11,7 @@ textbook one**.
 ## The core loop (what the demo has to prove)
 
 ```
- textbook rules ──► plan ──► she trains ──► she logs (energy, effort, done?)
+ textbook rules ──► plan ──► she trains ──► she logs (done?, session RPE, fatigue)
         ▲                                              │
         └──── personal adjustment ◄── learned pattern ◄┘
 ```
@@ -54,14 +54,14 @@ the UI.
   the `v_cycle_week_performance` view (days 29+ count as week 4). Learning and
   insights both group by cycle week, so "week 3" means the same thing on every
   screen.
-- **Textbook pattern.** It is defined once, in the Part 2 rules JSON, as the
-  expected energy (1–5) and intensity modifier for each cycle week. Part 7
-  compares against those numbers, and the seed data is shaped against them.
-  They must match the values in `database/README.md`
-  (week 1: 3.0, week 2: 4.5, week 3: 4.0, week 4: 2.5). Energy is lowest on
-  her period, peaks around ovulation, holds up through week 3, then dips.
-- **Expected effort per planned intensity.** LOW → RPE 4, MODERATE → RPE 6,
-  HIGH → RPE 8.
+- **Default pattern.** Defined once, in `api/src/core/rules.json`, as the
+  expected fatigue (Hooper Index, 1–7) for each cycle week: week 1: 3.5,
+  week 2: 2.5, week 3: 3.0, week 4: 4.5. It mirrors where phaseRules.json puts
+  the heavy and light work (freshest at the follicular peak, most fatigued in
+  the late luteal deload). It's a modelling assumption, not measured data.
+  Insights compares against it, and the seed data is shaped against it.
+- **Planned session RPE per intensity** (Borg CR-10): LOW → 3, MODERATE → 5,
+  HIGH → 7. Planned session load = planned RPE × planned minutes.
 
 ---
 
@@ -89,7 +89,7 @@ Produces the weekly training plan and the nutrition notes for that phase.
 
 1. **Textbook layer.** A deterministic rules table in JSON keyed by
    phase/cycle week × goal. It gives the base intensity and volume modifiers,
-   the session types and the expected energy. There is no LLM call, so it
+   the session types and the expected fatigue. There is no LLM call, so it
    still works if the API is down during the demo.
 2. **Personal layer.** Applies the adjustment for the current week (from the
    learning layer below) on top of the textbook modifier:
@@ -97,9 +97,9 @@ Produces the weekly training plan and the nutrition notes for that phase.
    The generator then re-buckets sessions into LOW/MODERATE/HIGH, so a large
    enough shift visibly changes a session's intensity, not just a number.
 3. **Say why.** Every plan carries `textbook_intensity`, `personal_adjustment`
-   and a one-line `adjustment_reason`, for example: "Your energy in week 3 has
-   averaged 2.9 vs the typical 4.0 across 10 sessions, so you've made it
-   20% lighter." Plan changes are always credited to her and her logs, never
+   and a one-line `adjustment_reason`, for example: "Your fatigue in week 3 has
+   averaged 4.6 out of 7 vs the 3.0 the default expects, across 10 sessions,
+   so you've made it 20% lighter." Plan changes are always credited to her and her logs, never
    to "we": it's her body changing the plan. The personal plan is only half of what we need to show; the
    difference from the textbook plan is the other half.
 
@@ -111,14 +111,16 @@ time. The numbers stay rule-based.
 A single function that both Part 2 and Part 7 call:
 
 ```
-learnedPattern(userId, asOfDate) -> {
+learnedPattern(sessions, asOfDate) -> {
   week: 1..4 -> {
-    sessions,           // logged sessions in this bucket before asOfDate
-    avg_energy,         // her average
-    textbook_energy,    // from the rules JSON
-    energy_delta,       // avg_energy - textbook_energy
-    effort_delta,       // avg(RPE - expected RPE for planned intensity)
-    completion_pct,
+    sessions,           // sessions with a fatigue rating in this bucket before asOfDate
+    avgFatigue,         // her average, Hooper 1-7
+    textbookFatigue,    // from the rules JSON
+    fatigueDelta,       // avgFatigue - textbookFatigue
+    rpeDelta,           // avg(session RPE - planned RPE for the intensity)
+    avgLoad,            // her session load, RPE x minutes (Foster)
+    plannedLoad,        // planned RPE x planned minutes, same sessions
+    completionPct,
     confidence,         // min(1, sessions / 6); 0 below 3 sessions
     adjustment          // what Part 2 applies
   }
@@ -128,16 +130,17 @@ learnedPattern(userId, asOfDate) -> {
 **Adjustment rule** (simple on purpose, so it's easy to explain to judges):
 
 ```
-if |energy_delta| < 0.5:  adjustment = 0          // normal variation, stay textbook
-else:                     adjustment = clamp(0.2 * energy_delta, -0.20, +0.20)
-                                       * confidence * part1_confidence
+if |fatigueDelta| < 1:  adjustment = 0          // normal variation, stay default
+else:                   adjustment = clamp(-0.15 * fatigueDelta, -0.20, +0.20)
+                                     * confidence * part1_confidence
 ```
 
-Only energy moves the plan. Effort and completion are shown on the insights
-screen as supporting evidence ("and your effort ran 2 points harder than
-planned") but don't feed the formula. The seed data rates even easy sessions
-as hard, so an effort term would dial down every low-energy week and blur the
-one real difference.
+Only fatigue moves the plan. It's rated independently of what was prescribed,
+so dialing a week down doesn't erase the evidence that moved it. Session RPE
+against the plan, and session load, are shown on Insights as a second opinion
+("sessions that week felt 2.4 RPE points harder than planned") but don't feed
+the formula. Her hardest-feeling week is the week with the highest average
+fatigue; the default's is week 4.
 
 - Below 3 logged sessions in a week bucket there is no adjustment, and she gets
   the textbook plan. That's the honest cold start.
@@ -148,9 +151,9 @@ one real difference.
 - Suppressed (birth control) users: bucket by cycle week of the pill pack if
   known, or skip personal learning for v1.
 
-**With the current seed data:** week 3 energy delta is −1.10, which gives
-−0.20 (the full cap): week 3 is 20% lighter. Every other week is within ±0.25
-of textbook, under the threshold, so it stays exactly textbook.
+**With the current seed data:** week 3 fatigue delta is +1.60, which gives
+−0.20 (the full cap): week 3 is 20% lighter. Every other week is within a
+point of the default, under the threshold, so it stays exactly textbook.
 
 ## Part 3: Data layer
 
@@ -195,22 +198,23 @@ dedicated polish pass (see build order).
 ## Part 6: Today view and session logging
 
 Shows what she's doing today, then after the session a quick log of how it felt
-(energy, effort, completed or not). Three taps maximum. This feeds the learning
+(how it went, session RPE on the Borg CR-10 scale, fatigue on the Hooper
+Index). Three taps maximum, only the first required. This feeds the learning
 layer.
 
 - **Close the loop in the UI.** After she logs, show one line of feedback, for
   example: "Logged. That's 12 sessions in week 2, and your plan is 92% tuned to
   you." She should feel that logging does something.
 - If today's session was adjusted, the card shows the reason:
-  "Lighter than usual: your week 1 energy runs low."
+  "Lighter than usual: your week 1 fatigue runs high."
 
 ## Part 7: Insights, "what we learned and what we changed"
 
 After enough logged sessions, show her personal pattern next to the textbook
 pattern, then show **the action taken because of it**.
 
-1. **The pattern:** her energy curve vs the textbook curve by cycle week.
-   "Your energy crashes right after ovulation, a week earlier than typical."
+1. **The pattern:** her fatigue and session load vs the default by cycle week.
+   "Your hardest-feeling week is week 3, not week 4 as the default expects."
 2. **The change:** "So we start your deload at day 17 instead of day 22, and
    lighten week 3 by 20%." Include a Textbook plan / Your plan toggle.
 3. **The learning timeline:** the adjustment for each plan across her history

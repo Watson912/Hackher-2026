@@ -1,16 +1,31 @@
 import { useCallback, useEffect, useState } from 'react'
 import { api, type LogResult, type Today as TodayData } from '../api.ts'
+import { FuelCard } from '../components/FuelCard.tsx'
+import { InfoHeading } from '../components/InfoHeading.tsx'
 import { LogSession } from '../components/LogSession.tsx'
-import { change, longDate, titleCase, weekday } from '../format.ts'
+import { PeriodLogger } from '../components/PeriodLogger.tsx'
+import { SessionExercises } from '../components/SessionExercises.tsx'
+import { change, longDate, phaseLabel, titleCase, weekday } from '../format.ts'
 
-const PHASE_BLURB: Record<string, string> = {
-  MENSTRUAL: 'Your period. Hormones are at their lowest, so the plan eases off.',
-  FOLLICULAR: 'Estrogen is rising. A good window to push and progress.',
-  OVULATORY: 'Around ovulation. Typically your strongest days.',
-  LUTEAL: 'Progesterone is up. Energy often dips, so volume comes down.',
-  SUPPRESSED: 'Hormonal birth control keeps things steady, so your training stays consistent.',
-  UNKNOWN: 'Log your next period to line your plan up with your cycle.',
+// Today: her workout, built from her onboarding answers and where she is in
+// her cycle. Swap anything, log it when she's done. Kept short on purpose.
+
+/** Today's place in her cycle as a ring, in the phase's color. */
+function CycleRing({ day, length, phase }: { day: number; length: number; phase: string }) {
+  const r = 34
+  const c = 2 * Math.PI * r
+  return (
+    <svg className="cycle-ring" viewBox="0 0 84 84" width="84" height="84" role="img" aria-label={`Day ${day} of ${length}`}>
+      <circle cx="42" cy="42" r={r} className="ring-track" />
+      <circle cx="42" cy="42" r={r} className="ring-fill" style={{ stroke: `var(--phase-${phase.toLowerCase()}, var(--accent))` }}
+        strokeDasharray={`${(day / length) * c} ${c}`} transform="rotate(-90 42 42)" />
+      <text x="42" y="42" className="ring-day">{day}</text>
+      <text x="42" y="58" className="ring-of">of {length}</text>
+    </svg>
+  )
 }
+
+const dayOfMonth = (date: string) => Number(date.slice(8))
 
 export function Today() {
   const [data, setData] = useState<TodayData | null>(null)
@@ -25,9 +40,10 @@ export function Today() {
   if (error) return <p className="error">Couldn't load today: {error}</p>
   if (!data) return <p className="muted">Loading…</p>
 
-  const { cycle, session, upcoming, learning } = data
+  const { cycle, session, upcoming, learning, periodLate } = data
   const hasCycleDay = cycle.cycleDay !== null
   const logged = session && session.status !== 'PLANNED'
+  const next = learning?.nextChange
 
   function onLogged(result: LogResult) {
     setLogResult(result)
@@ -36,50 +52,60 @@ export function Today() {
 
   return (
     <>
-      <section className="hero">
-        <p className="eyebrow">{longDate(data.today)}</p>
-        <h2>
-          {hasCycleDay
-            ? <>Day {cycle.cycleDay} · {titleCase(cycle.phase)}</>
-            : cycle.phase === 'SUPPRESSED' ? 'Steady training' : 'Welcome'}
-        </h2>
-        <p className="muted">{PHASE_BLURB[cycle.phase]}</p>
+      <section className="hero today-hero">
+        <div>
+          <p className="eyebrow">{longDate(data.today)}</p>
+          <h2>{hasCycleDay ? phaseLabel(cycle.phase) : cycle.phase === 'SUPPRESSED' ? 'Steady training' : 'Welcome'}</h2>
+          {cycle.stale && <p className="muted">{cycle.prompt}</p>}
+          {periodLate && (
+            <p className="late-note">Period due {periodLate.daysLate === 1 ? 'yesterday' : `${periodLate.daysLate} days ago`}</p>
+          )}
+          {!cycle.stale && !periodLate && cycle.daysUntilNextPeriod !== null && (
+            <p className="muted">Next period in about {cycle.daysUntilNextPeriod} days</p>
+          )}
+          {cycle.phase !== 'SUPPRESSED' && (
+            <div className="hero-action"><PeriodLogger onLogged={load} prominent={periodLate !== null || cycle.stale} /></div>
+          )}
+        </div>
+        {hasCycleDay && <CycleRing day={cycle.cycleDay!} length={cycle.cycleLength} phase={cycle.phase} />}
       </section>
 
       <section className="card today-card">
-        <p className="eyebrow">Today's session</p>
+        <p className="eyebrow">Today's workout</p>
         {!session && (
           <>
             <h3>Rest day</h3>
-            <p className="muted">Recovery is part of the plan. A walk or some mobility is plenty.</p>
+            <p className="muted">A walk or some mobility is plenty.</p>
           </>
         )}
         {session && (
           <>
             <div className="today-session">
               <div>
-                <h3>{session.focus}</h3>
-                <p className="muted">{session.durationMin} min · {titleCase(session.sessionType.replace('_', ' '))}</p>
+                <InfoHeading title={session.focus} label="today's workout">
+                  <p>Built from your answers and where you are in your cycle. Tap <b>Swap</b> to change an exercise.</p>
+                </InfoHeading>
+                <p className="session-meta">
+                  <span className="chip">
+                    <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
+                    {session.durationMin} min
+                  </span>
+                </p>
               </div>
               <span className={`pill pill-${session.intensity.toLowerCase()}`}>{titleCase(session.intensity)}</span>
             </div>
 
-            {session.textbook && (
-              <p className="adjusted-note">
-                <b>Adjusted for you.</b> The textbook says {session.textbook.focus.toLowerCase()},{' '}
-                {session.textbook.intensity.toLowerCase()}, {session.textbook.durationMin} min.{' '}
-                {learning?.reason}
-              </p>
-            )}
-            {session.nutrition && <p className="nutrition"><b>Fuel:</b> {session.nutrition}</p>}
+            {session.textbook && <p className="adjusted-note">Lighter than usual, based on your logs.</p>}
 
-            {!logged && <LogSession sessionId={session.id} onLogged={onLogged} />}
+            <SessionExercises key={session.id} sessionId={session.id} exercises={session.exercises} lifts={session.lifts} onSwapped={load} />
+            {data.equipmentNotes.map((note) => <p key={note} className="muted small equipment-note">{note}</p>)}
+
+            {!logged && <LogSession sessionId={session.id} plannedMin={session.durationMin} onLogged={onLogged} />}
             {logged && (
               <div className="logged">
                 <span className="check-badge" aria-hidden="true">✓</span>
                 <div>
                   <b>{session.status === 'SKIPPED' ? 'Skipped' : session.status === 'PARTIAL' ? 'Cut short' : 'Done'}</b>
-                  {' '}· energy {session.energy}/5
                   {logResult && <p className="feedback">{logResult.feedback}</p>}
                 </div>
               </div>
@@ -88,57 +114,23 @@ export function Today() {
         )}
       </section>
 
-      {learning && (
-        <section className="card learning-card">
-          <p className="eyebrow">What your body is showing</p>
-          {learning.sessions < learning.needed ? (
-            <>
-              <h3>Learning your week {learning.week}</h3>
-              <p className="muted">
-                {learning.sessions} of {learning.needed} sessions logged. After {learning.needed}, your week {learning.week} starts
-                shaping your plan.
-              </p>
-              <div className="meter" role="progressbar" aria-valuemin={0} aria-valuemax={learning.needed} aria-valuenow={learning.sessions}>
-                <span style={{ width: `${(learning.sessions / learning.needed) * 100}%` }} />
-              </div>
-            </>
-          ) : (
-            <>
-              <h3>Your plan is {learning.tunedPct}% tuned to you</h3>
-              <p className="muted">
-                {learning.adjustment === 0
-                  ? `Week ${learning.week} matches the textbook so far, across ${learning.sessions} sessions.`
-                  : learning.reason}
-              </p>
-              {learning.nextChange && (
-                <p className="adjusted-note">
-                  <b>Coming up: week {learning.nextChange.week} is {change(learning.nextChange.adjustment)}.</b>{' '}
-                  {learning.nextChange.reason}
-                </p>
-              )}
-            </>
-          )}
-        </section>
-      )}
-
       {upcoming.length > 0 && (
         <section className="card">
           <p className="eyebrow">Coming up</p>
+          {next && <p className="muted small">Week {next.week} is {change(next.adjustment)}, based on your logs.</p>}
           <ul className="upcoming">
             {upcoming.map((s) => (
               <li key={s.id}>
-                <span className="weekday">{weekday(s.date)}</span>
-                <span className="upcoming-focus">
-                  {s.focus}
-                  {s.cycleDay !== null && <small className="muted"> · day {s.cycleDay}</small>}
-                  {s.adjusted && <small className="adjusted-tag">adjusted</small>}
-                </span>
+                <span className="date-badge"><small>{weekday(s.date)}</small><b>{dayOfMonth(s.date)}</b></span>
+                <span className="upcoming-focus">{s.focus}</span>
                 <span className={`pill pill-${s.intensity.toLowerCase()}`}>{titleCase(s.intensity)}</span>
               </li>
             ))}
           </ul>
         </section>
       )}
+
+      <FuelCard nutrition={data.nutrition} />
     </>
   )
 }

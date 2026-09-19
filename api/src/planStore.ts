@@ -1,27 +1,54 @@
-// Saves generated plans: one training_plans row per block and a PLANNED
+// Saves the four-week plan: one training_plans row per block and a PLANNED
 // session_logs row per session. Upcoming PLANNED sessions are replaced
 // every time, so the saved plan always reflects what the app knows now.
-import type { ResultSetHeader, RowDataPacket } from 'mysql2';
-import { addDays } from './core/cycleEngine.ts';
-import { generateWeek, planBlocks, type WeekPlan } from './core/planGenerator.ts';
+//
+// Every planned session's exercises go in planned_exercises: her routine,
+// with the load the app suggests and why. Today and the Plan view read it.
+import type { PoolConnection, ResultSetHeader, RowDataPacket } from 'mysql2/promise';
+import { generatePlan, type ExercisePlan, type WeekPlan } from './core/planGenerator.ts';
 import { pool } from './db.ts';
 import type { UserContext } from './users.ts';
 
-const HORIZON_DAYS = 13; // plan today plus the next two weeks
+/** Writes (or rewrites) one session's exercises, in order. */
+export async function saveRoutine(conn: PoolConnection, userId: number, sessionId: number, exercises: ExercisePlan[]) {
+  await conn.query('DELETE FROM planned_exercises WHERE session_log_id = ?', [sessionId]);
+  for (const [i, e] of exercises.entries()) {
+    await conn.query(
+      `INSERT INTO planned_exercises
+         (user_id, session_log_id, position, exercise_id, swapped_from, sets, reps, target_rpe, rest_sec,
+          load_kg, load_text, load_reason, load_pct, prescription_json)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [userId, sessionId, i + 1, e.exerciseId, e.swappedFrom?.id ?? null, e.sets, e.reps, e.rpe, e.restSec,
+        e.loadKg, e.load.slice(0, 160), e.loadReason?.slice(0, 255) ?? null, e.loadPct, JSON.stringify(e)],
+    );
+  }
+}
+
+/** A session's saved exercises, in order (the routine as she'll see it). */
+export async function loadRoutine(sessionId: number): Promise<ExercisePlan[]> {
+  const [rows] = await pool.query<RowDataPacket[]>(
+    'SELECT prescription_json FROM planned_exercises WHERE session_log_id = ? ORDER BY position',
+    [sessionId],
+  );
+  return rows.map((r) => (typeof r.prescription_json === 'string' ? JSON.parse(r.prescription_json) : r.prescription_json));
+}
 
 export async function refreshUpcomingPlan(ctx: UserContext): Promise<WeekPlan[]> {
-  const { userId, today, cycleInput, goal, daysPerWeek, pattern, cycleId } = ctx;
-  const plans = planBlocks(cycleInput, today, addDays(today, HORIZON_DAYS)).map((block) =>
-    generateWeek({ cycle: cycleInput, weekStart: block.start, length: block.length, goal, daysPerWeek, pattern }),
-  );
+  const { userId, today, cycleInput, goal, daysPerWeek, pattern, athlete, cycleId } = ctx;
+  const plans = generatePlan({ cycle: cycleInput, goal, daysPerWeek, pattern, athlete });
 
   const conn = await pool.getConnection();
   try {
     await conn.beginTransaction();
 
-    // Days she has already logged keep their log; everything planned from
-    // today on is regenerated.
-    await conn.query(`DELETE FROM session_logs WHERE user_id = ? AND status = 'PLANNED' AND session_date >= ?`, [userId, today]);
+    // Days she has already logged (the session, or any lift in it) keep
+    // their log; everything else planned from today on is regenerated.
+    await conn.query(
+      `DELETE FROM session_logs
+       WHERE user_id = ? AND status = 'PLANNED' AND session_date >= ?
+         AND session_log_id NOT IN (SELECT session_log_id FROM exercise_logs WHERE user_id = ?)`,
+      [userId, today, userId],
+    );
     const [loggedRows] = await conn.query<RowDataPacket[]>(
       `SELECT DATE_FORMAT(session_date, '%Y-%m-%d') AS d FROM session_logs WHERE user_id = ? AND session_date >= ?`,
       [userId, today],
@@ -47,13 +74,14 @@ export async function refreshUpcomingPlan(ctx: UserContext): Promise<WeekPlan[]>
 
       for (const s of plan.sessions) {
         if (s.date < today || logged.has(s.date)) continue;
-        await conn.query(
+        const [session] = await conn.query<ResultSetHeader>(
           `INSERT INTO session_logs
              (user_id, plan_id, session_date, cycle_day, phase, session_type, planned_intensity,
               planned_duration_min, focus, status)
            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'PLANNED')`,
           [userId, planId, s.date, s.cycleDay, s.phase, s.sessionType, s.intensity, s.durationMin, s.focus],
         );
+        await saveRoutine(conn, userId, session.insertId, s.exercises);
       }
     }
 

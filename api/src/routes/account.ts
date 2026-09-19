@@ -3,9 +3,10 @@ import { readFile } from 'node:fs/promises';
 import { Router } from 'express';
 import mysql, { type ResultSetHeader } from 'mysql2/promise';
 import { daysBetween } from '../core/cycleEngine.ts';
+import { allowedEquipment, EQUIPMENT_ITEMS, exercisesFor } from '../core/planGenerator.ts';
 import { pool } from '../db.ts';
 import { refreshUpcomingPlan } from '../planStore.ts';
-import { demoUserId, loadUser, localToday } from '../users.ts';
+import { demoUserId, loadUser, localToday, parseWeekdays } from '../users.ts';
 
 export const accountRouter = Router();
 
@@ -15,6 +16,22 @@ const GOALS = ['STRENGTH', 'MUSCLE_GAIN', 'ENDURANCE', 'FAT_LOSS', 'GENERAL_FITN
 const BIRTH_CONTROL = ['NONE', 'COMBINED_PILL', 'MINI_PILL', 'HORMONAL_IUD', 'COPPER_IUD',
   'IMPLANT', 'INJECTION', 'RING', 'PATCH', 'OTHER'] as const;
 const REGULARITY = ['REGULAR', 'IRREGULAR', 'UNKNOWN'] as const;
+const EQUIPMENT = ['FULL_GYM', 'DUMBBELLS_HOME', 'BODYWEIGHT'] as const;
+const EXPERIENCE = ['NEW', 'UNDER_1', '1_2', '2_4', '4_PLUS'] as const;
+const CONSISTENCY = ['NEVER', 'RETURNING', 'STRUGGLING', 'CONSISTENT'] as const;
+const LEVEL = ['BEGINNER', 'INTERMEDIATE', 'ADVANCED'] as const;
+
+/**
+ * Years of strength training sets her level (it picks the novice or
+ * intermediate starting loads in exercises.json). If she has never trained
+ * consistently or is coming back from a break, start one level lower: her
+ * logged lifts take over after the first session anyway.
+ */
+function experienceLevel(years: (typeof EXPERIENCE)[number], consistency: (typeof CONSISTENCY)[number] | null) {
+  const base = years === '4_PLUS' ? 2 : years === '1_2' || years === '2_4' ? 1 : 0;
+  const down = consistency === 'NEVER' || consistency === 'RETURNING' ? 1 : 0;
+  return LEVEL[Math.max(0, base - down)];
+}
 // Copper IUD is the one non-hormonal method, so her natural phases still run.
 const NON_HORMONAL = new Set(['NONE', 'COPPER_IUD']);
 
@@ -43,6 +60,16 @@ accountRouter.post('/demo/reset', async (_req, res) => {
   res.json({ userId: ctx.userId, firstName: ctx.firstName, isDemo: true });
 });
 
+// The equipment checklist for onboarding: every item the exercise library
+// uses, and what each tier preset ticks (exercises.json meta.equipmentTiers).
+accountRouter.get('/equipment', (_req, res) => {
+  const items = EQUIPMENT_ITEMS.filter((item) => item !== 'none');
+  const preset = (tier: (typeof EQUIPMENT)[number]) => (allowedEquipment(tier) ?? items).filter((item) => item !== 'none');
+  // How many exercises each item appears in, so the checklist can say what it unlocks.
+  const counts = Object.fromEntries(items.map((item) => [item, exercisesFor('FULL_GYM').filter((e) => e.equipment.includes(item)).length]));
+  res.json({ items, counts, presets: Object.fromEntries(EQUIPMENT.map((tier) => [tier, preset(tier)])) });
+});
+
 interface OnboardingBody {
   firstName?: unknown;
   goal?: unknown;
@@ -51,6 +78,23 @@ interface OnboardingBody {
   lastPeriodStart?: unknown;
   cycleLength?: unknown;       // null = "not sure"
   regularity?: unknown;
+  heightCm?: unknown;
+  weightKg?: unknown;
+  age?: unknown;
+  goalWeightKg?: unknown;      // optional
+  equipmentTier?: unknown;
+  equipment?: unknown;         // optional checklist of exercises.json equipment ids
+  experience?: unknown;        // years of strength training, optional (skip = NEW)
+  consistency?: unknown;       // optional
+  weekdays?: unknown;          // the days she can train, 0 = Sunday; optional
+}
+
+/** A number within [min, max], or a clear 400. Optional fields may be null/absent. */
+function measure(value: unknown, field: string, min: number, max: number, optional = false): number | null {
+  if (optional && (value === null || value === undefined || value === '')) return null;
+  const n = Number(value);
+  if (!Number.isFinite(n) || n < min || n > max) throw new BadRequest(`${field} must be between ${min} and ${max}`);
+  return Math.round(n * 10) / 10;
 }
 
 function pick<T extends readonly string[]>(value: unknown, options: T, field: string): T[number] {
@@ -66,7 +110,13 @@ accountRouter.post('/onboarding', async (req, res) => {
     const firstName = typeof body.firstName === 'string' ? body.firstName.trim().slice(0, 50) : '';
     if (!firstName) throw new BadRequest('firstName is required');
 
-    const daysPerWeek = Number(body.daysPerWeek);
+    let weekdays: number[] | null;
+    try {
+      weekdays = parseWeekdays(body.weekdays);
+    } catch (err) {
+      throw new BadRequest((err as Error).message);
+    }
+    const daysPerWeek = weekdays ? weekdays.length : Number(body.daysPerWeek);
     if (!Number.isInteger(daysPerWeek) || daysPerWeek < 1 || daysPerWeek > 7) throw new BadRequest('daysPerWeek must be 1-7');
 
     const birthControl = pick(body.birthControl, BIRTH_CONTROL, 'birthControl');
@@ -89,10 +139,30 @@ accountRouter.post('/onboarding', async (req, res) => {
     const cycleLength = unsureLength ? 28 : Number(body.cycleLength);
     if (!Number.isInteger(cycleLength) || cycleLength < 21 || cycleLength > 45) throw new BadRequest('cycleLength must be 21-45');
 
+    const age = measure(body.age, 'age', 13, 90)!;
+    const years = pick(body.experience ?? 'NEW', EXPERIENCE, 'experience');
+    const consistency = body.consistency === null || body.consistency === undefined ? null : pick(body.consistency, CONSISTENCY, 'consistency');
+    let equipment: string[] = [];
+    if (body.equipment !== null && body.equipment !== undefined) {
+      if (!Array.isArray(body.equipment) || body.equipment.some((e) => typeof e !== 'string' || !EQUIPMENT_ITEMS.includes(e))) {
+        throw new BadRequest(`equipment must be a list of: ${EQUIPMENT_ITEMS.join(', ')}`);
+      }
+      equipment = [...new Set(body.equipment as string[])];
+    }
     input = {
       firstName,
-      goal: pick(body.goal, GOALS, 'goal'),
+      heightCm: measure(body.heightCm, 'heightCm', 120, 220)!,
+      weightKg: measure(body.weightKg, 'weightKg', 30, 250)!,
+      goalWeightKg: measure(body.goalWeightKg, 'goalWeightKg', 30, 250, true),
+      // Only her age is asked for; store a date of birth that gives that age today.
+      dateOfBirth: `${Number(today.slice(0, 4)) - age}${today.slice(4).replace('-02-29', '-02-28')}`,
+      equipmentTier: pick(body.equipmentTier ?? 'FULL_GYM', EQUIPMENT, 'equipmentTier'),
+      goal: pick(body.goal ?? 'GENERAL_FITNESS', GOALS, 'goal'),
+      experienceLevel: experienceLevel(years, consistency),
+      consistency,
+      equipment,
       daysPerWeek,
+      weekdays,
       birthControl,
       suppressed,
       lastPeriodStart,
@@ -113,19 +183,25 @@ accountRouter.post('/onboarding', async (req, res) => {
     await conn.beginTransaction();
     // No login for the hackathon: a placeholder email keeps users.email unique.
     const [user] = await conn.query<ResultSetHeader>(
-      `INSERT INTO users (first_name, email, password) VALUES (?, ?, 'no-login')`,
-      [input.firstName, `guest-${randomUUID()}@healthher.app`],
+      `INSERT INTO users (first_name, email, password, date_of_birth, height_cm) VALUES (?, ?, 'no-login', ?, ?)`,
+      [input.firstName, `guest-${randomUUID()}@healthher.app`, input.dateOfBirth, input.heightCm],
     );
     userId = user.insertId;
 
     await conn.query(
       `INSERT INTO cycle_profiles
          (user_id, last_period_start_date, avg_cycle_length_days, avg_period_length_days, cycle_regularity,
-          birth_control, cycle_suppressed, goal, training_days_per_week, experience_level, onboarding_completed)
-       VALUES (?, ?, ?, 5, ?, ?, ?, ?, ?, 'BEGINNER', TRUE)`,
+          birth_control, cycle_suppressed, goal, training_days_per_week, training_weekdays, experience_level,
+          training_consistency, weight_kg, goal_weight_kg, equipment_tier, onboarding_completed)
+       VALUES (?, ?, ?, 5, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, TRUE)`,
       [userId, input.lastPeriodStart, input.cycleLength, input.regularity, input.birthControl,
-        input.suppressed, input.goal, input.daysPerWeek],
+        input.suppressed, input.goal, input.daysPerWeek, input.weekdays?.join(',') ?? null, input.experienceLevel, input.consistency,
+        input.weightKg, input.goalWeightKg, input.equipmentTier],
     );
+
+    for (const item of input.equipment) {
+      await conn.query('INSERT INTO user_equipment (user_id, equipment) VALUES (?, ?)', [userId, item]);
+    }
 
     if (input.lastPeriodStart) {
       await conn.query(

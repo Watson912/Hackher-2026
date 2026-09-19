@@ -1,19 +1,25 @@
 -- =====================================================================
 -- HealthHer  |  Part 3: Data Layer  |  Schema (MySQL 8.0+)
 -- ---------------------------------------------------------------------
--- Four tables, built on top of the existing `users` table in schema.sql:
+-- Eight tables, built on top of the existing `users` table in schema.sql:
 --
---   1. cycle_profiles   -> user profile    (cycle settings + training settings)
---   2. cycles           -> cycle history   (one row per menstrual cycle)
---   3. training_plans   -> generated plans (one row per week, Part 2 output)
---   4. session_logs     -> session logs    (one row per session, planned + logged)
+--   1. cycle_profiles    -> user profile    (cycle settings + training settings)
+--   2. cycles            -> cycle history   (one row per menstrual cycle)
+--   3. training_plans    -> generated plans (one row per week, Part 2 output)
+--   4. session_logs      -> session logs    (one row per session, planned + logged:
+--                                             session RPE, fatigue, minutes, load)
+--   5. exercise_logs     -> lift logs       (one row per exercise she logs: weight + RPE)
+--   6. planned_exercises -> her routine     (the exercises, sets, reps and suggested
+--                                             load of every planned session)
+--   7. exercise_swaps    -> her swaps       (exercises she swapped out, remembered)
+--   8. user_equipment    -> her equipment   (the items she ticked in onboarding)
 --
 -- Run order in dBeaver:
 --   1) schema.sql              (existing schema, creates `users`)
 --   2) healthher_01_schema.sql (this file)
 --   3) healthher_02_seed.sql   (demo user with 2 cycles of history)
 --
--- Safe to re-run: drops and recreates only the four HealthHer tables.
+-- Safe to re-run: drops and recreates only the eight HealthHer tables.
 -- =====================================================================
 
 CREATE DATABASE IF NOT EXISTS herbalance
@@ -57,6 +63,10 @@ DROP VIEW  IF EXISTS v_phase_performance;
 DROP VIEW  IF EXISTS v_cycle_week_performance;
 DROP VIEW  IF EXISTS v_cycle_history;
 
+DROP TABLE IF EXISTS user_equipment;
+DROP TABLE IF EXISTS exercise_swaps;
+DROP TABLE IF EXISTS planned_exercises;
+DROP TABLE IF EXISTS exercise_logs;
 DROP TABLE IF EXISTS session_logs;
 DROP TABLE IF EXISTS training_plans;
 DROP TABLE IF EXISTS cycles;
@@ -100,8 +110,31 @@ CREATE TABLE cycle_profiles (
 
     training_days_per_week  TINYINT UNSIGNED NOT NULL DEFAULT 3,
 
+    -- the days she can train, 0 = Sunday ... 6 = Saturday, e.g. '1,3,5'.
+    -- NULL = no preference: sessions are spread evenly through the week.
+    training_weekdays       VARCHAR(13) NULL,
+
+    -- from "how much strength training experience do you have?", one level
+    -- lower if she has never been consistent or is returning from a break
     experience_level        ENUM('BEGINNER','INTERMEDIATE','ADVANCED')
                             NOT NULL DEFAULT 'BEGINNER',
+
+    -- "how consistent are you with strength training?" (onboarding)
+    training_consistency    ENUM('NEVER','RETURNING','STRUGGLING','CONSISTENT') NULL,
+
+    -- bodyweight, for barbell loads (exercises.json loadBasis). NULL means
+    -- the plan shows an effort target instead of a number.
+    weight_kg               DECIMAL(5,2) NULL,
+
+    -- used only to set a fuelling range that keeps her recovering; the change
+    -- it implies is capped at 0.5% of bodyweight a week (see nutrition.ts)
+    goal_weight_kg          DECIMAL(5,2) NULL,
+
+    -- what she can train with; the plan only uses exercises this allows
+    -- (exercises.json meta.equipmentTiers). If she ticked items in
+    -- onboarding, user_equipment overrides the tier's preset.
+    equipment_tier          ENUM('FULL_GYM','DUMBBELLS_HOME','BODYWEIGHT')
+                            NOT NULL DEFAULT 'FULL_GYM',
 
     onboarding_completed    BOOLEAN NOT NULL DEFAULT FALSE,
 
@@ -175,8 +208,8 @@ CREATE TABLE training_plans (
     week_start_date         DATE NOT NULL,       -- first day of the 7-day block
     cycle_day_at_start      SMALLINT UNSIGNED,   -- cycle day on week_start_date
 
-    phase                   ENUM('MENSTRUAL','FOLLICULAR','OVULATORY','LUTEAL',
-                                 'SUPPRESSED','UNKNOWN')
+    phase                   ENUM('MENSTRUAL','FOLLICULAR','OVULATORY','EARLY_LUTEAL','LATE_LUTEAL',
+                                 'LUTEAL','SUPPRESSED','UNKNOWN')
                             NOT NULL DEFAULT 'UNKNOWN',
 
     goal                    ENUM('STRENGTH','MUSCLE_GAIN','ENDURANCE','FAT_LOSS',
@@ -231,8 +264,8 @@ CREATE TABLE session_logs (
 
     -- ---- cycle context, snapshotted at generation time ------------
     cycle_day               SMALLINT UNSIGNED,
-    phase                   ENUM('MENSTRUAL','FOLLICULAR','OVULATORY','LUTEAL',
-                                 'SUPPRESSED','UNKNOWN')
+    phase                   ENUM('MENSTRUAL','FOLLICULAR','OVULATORY','EARLY_LUTEAL','LATE_LUTEAL',
+                                 'LUTEAL','SUPPRESSED','UNKNOWN')
                             NOT NULL DEFAULT 'UNKNOWN',
 
     -- ---- what the plan asked for ----------------------------------
@@ -242,12 +275,16 @@ CREATE TABLE session_logs (
     planned_duration_min    SMALLINT UNSIGNED,
     focus                   VARCHAR(120),
 
-    -- ---- what actually happened (Part 6, three taps) --------------
+    -- ---- what actually happened (three taps; only status required) ----
     status                  ENUM('PLANNED','COMPLETED','PARTIAL','SKIPPED')
                             NOT NULL DEFAULT 'PLANNED',
-    energy_level            TINYINT UNSIGNED,    -- 1-5, how she felt
-    perceived_effort        TINYINT UNSIGNED,    -- RPE 1-10, how hard it was
+    perceived_effort        TINYINT UNSIGNED,    -- session RPE, Borg CR-10 (0-10)
+    fatigue                 TINYINT UNSIGNED,    -- Hooper Index fatigue item, 1-7
     actual_duration_min     SMALLINT UNSIGNED,
+    -- Foster's session-RPE load: RPE x minutes, in arbitrary units
+    session_load            INT UNSIGNED
+                            GENERATED ALWAYS AS (perceived_effort * actual_duration_min) STORED,
+    energy_level            TINYINT UNSIGNED,    -- legacy 1-5 score, no longer asked
 
     notes                   VARCHAR(500),
     logged_at               DATETIME NULL,       -- NULL until she logs it
@@ -260,11 +297,121 @@ CREATE TABLE session_logs (
         FOREIGN KEY (plan_id) REFERENCES training_plans(plan_id) ON DELETE SET NULL,
 
     CONSTRAINT chk_energy CHECK (energy_level     IS NULL OR energy_level     BETWEEN 1 AND 5),
-    CONSTRAINT chk_effort CHECK (perceived_effort IS NULL OR perceived_effort BETWEEN 1 AND 10)
+    CONSTRAINT chk_effort CHECK (perceived_effort IS NULL OR perceived_effort BETWEEN 0 AND 10),
+    CONSTRAINT chk_fatigue CHECK (fatigue IS NULL OR fatigue BETWEEN 1 AND 7)
 ) ENGINE=InnoDB;
 
 CREATE INDEX idx_sessions_user_date  ON session_logs (user_id, session_date DESC);
 CREATE INDEX idx_sessions_user_phase ON session_logs (user_id, phase);
+
+
+-- =====================================================================
+-- 5. EXERCISE_LOGS  --  what she actually lifted
+-- One row per exercise she logs in a session: the weight she used, whether
+-- she finished every set, and her RPE on the Borg CR-10 scale (0-10). The
+-- plan generator reads her most recent row for an exercise to set the next
+-- load. load_pct is the phase's loadPct the lift was prescribed at, so the
+-- next session can scale her working weight to a lighter or heavier week.
+-- =====================================================================
+CREATE TABLE exercise_logs (
+    exercise_log_id     INT AUTO_INCREMENT PRIMARY KEY,
+
+    user_id             INT NOT NULL,
+    session_log_id      INT NOT NULL,
+    exercise_id         VARCHAR(64) NOT NULL,   -- exercises.json id
+    log_date            DATE NOT NULL,
+
+    load_kg             DECIMAL(6,2) NULL,      -- NULL for bodyweight, time or machine work she didn't weigh
+    load_pct            DECIMAL(4,2) NULL,      -- phase loadPct it was prescribed at
+    completed           BOOLEAN NOT NULL,       -- every set and rep done
+    rpe                 TINYINT UNSIGNED NOT NULL, -- Borg CR-10, 0-10
+
+    created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_exlog_user
+        FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    CONSTRAINT fk_exlog_session
+        FOREIGN KEY (session_log_id) REFERENCES session_logs(session_log_id) ON DELETE CASCADE,
+
+    CONSTRAINT uq_exlog_session_exercise UNIQUE (session_log_id, exercise_id),
+    CONSTRAINT chk_exlog_rpe CHECK (rpe BETWEEN 0 AND 10),
+    CONSTRAINT chk_exlog_load CHECK (load_kg IS NULL OR load_kg BETWEEN 0 AND 500)
+) ENGINE=InnoDB;
+
+CREATE INDEX idx_exlog_user_exercise ON exercise_logs (user_id, exercise_id, log_date DESC);
+
+
+-- =====================================================================
+-- 6. PLANNED_EXERCISES  --  her routine
+-- The exercises of every planned session, in order, with the sets, reps,
+-- RPE target and the load the app suggests (load_reason says why, from her
+-- exercise_logs). Written whenever the plan is regenerated; Today and the
+-- Plan view read from here. prescription_json keeps the full prescription
+-- (form cue, swap options) the app shows.
+-- =====================================================================
+CREATE TABLE planned_exercises (
+    planned_exercise_id INT AUTO_INCREMENT PRIMARY KEY,
+
+    user_id             INT NOT NULL,
+    session_log_id      INT NOT NULL,
+    position            TINYINT UNSIGNED NOT NULL,  -- order in the session, from 1
+    exercise_id         VARCHAR(64) NOT NULL,       -- exercises.json id
+    swapped_from        VARCHAR(64) NULL,           -- the exercise the plan picked, if she swapped it
+
+    sets                TINYINT UNSIGNED NOT NULL,
+    reps                VARCHAR(40) NOT NULL,       -- reps, a hold, or a duration
+    target_rpe          TINYINT UNSIGNED NOT NULL,
+    rest_sec            SMALLINT UNSIGNED NOT NULL,
+    load_kg             DECIMAL(6,2) NULL,          -- suggested weight; NULL = effort cue instead
+    load_text           VARCHAR(160) NOT NULL,      -- what the app shows: "50 kg", an effort cue...
+    load_reason         VARCHAR(255) NULL,          -- "Up from 47.5 kg, you rated that a 6"
+    load_pct            DECIMAL(4,2) NULL,          -- the phase loadPct it was prescribed at
+    prescription_json   JSON NOT NULL,
+
+    created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_planex_user
+        FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    CONSTRAINT fk_planex_session
+        FOREIGN KEY (session_log_id) REFERENCES session_logs(session_log_id) ON DELETE CASCADE,
+
+    CONSTRAINT uq_planex_session_exercise UNIQUE (session_log_id, exercise_id),
+    CONSTRAINT uq_planex_session_position UNIQUE (session_log_id, position)
+) ENGINE=InnoDB;
+
+
+-- =====================================================================
+-- 7. EXERCISE_SWAPS  --  swaps she made, remembered
+-- When she swaps an exercise, every future session uses her pick instead
+-- (if her equipment allows it). Swapping back deletes the row.
+-- =====================================================================
+CREATE TABLE exercise_swaps (
+    user_id             INT NOT NULL,
+    exercise_id         VARCHAR(64) NOT NULL,       -- what the plan picks
+    swap_to_id          VARCHAR(64) NOT NULL,       -- what she does instead
+    created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (user_id, exercise_id),
+    CONSTRAINT fk_swap_user
+        FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+
+-- =====================================================================
+-- 8. USER_EQUIPMENT  --  the equipment she has
+-- One row per exercises.json equipment item she ticked in onboarding.
+-- No rows means the equipment_tier preset applies.
+-- =====================================================================
+CREATE TABLE user_equipment (
+    user_id             INT NOT NULL,
+    equipment           VARCHAR(40) NOT NULL,       -- exercises.json equipment id, e.g. squat_rack
+
+    PRIMARY KEY (user_id, equipment),
+    CONSTRAINT fk_equipment_user
+        FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+) ENGINE=InnoDB;
 
 
 -- =====================================================================
@@ -301,7 +448,9 @@ SELECT s.user_id,
        s.session_type,
        s.planned_intensity,
        s.status,
-       s.energy_level,
+       s.fatigue,
+       s.perceived_effort,
+       s.session_load,
        CASE s.planned_intensity WHEN 'HIGH' THEN 100
                                 WHEN 'MODERATE' THEN 65
                                 ELSE 30 END AS load_score
@@ -319,8 +468,9 @@ SELECT user_id,
        COUNT(*)                                                   AS sessions_planned,
        SUM(status = 'COMPLETED')                                  AS sessions_completed,
        ROUND(100.0 * SUM(status = 'COMPLETED') / COUNT(*), 0)     AS completion_pct,
-       ROUND(AVG(energy_level), 2)                                AS avg_energy,
-       ROUND(AVG(perceived_effort), 2)                            AS avg_effort,
+       ROUND(AVG(fatigue), 2)                                     AS avg_fatigue,
+       ROUND(AVG(perceived_effort), 2)                            AS avg_session_rpe,
+       ROUND(AVG(session_load), 0)                                AS avg_session_load,
        ROUND(AVG(actual_duration_min), 0)                         AS avg_minutes
 FROM   session_logs
 WHERE  status <> 'PLANNED'
@@ -328,18 +478,20 @@ GROUP  BY user_id, phase;
 
 
 -- Part 7: the headline insight. Week of cycle, not phase, so the copy
--- can say "your energy crashes in week 3, a week earlier than typical".
+-- can say "your hardest-feeling week is week 3, not week 4". Days 29+
+-- fold into week 4, same as the cycle engine.
 CREATE VIEW v_cycle_week_performance AS
 SELECT user_id,
-       CEIL(cycle_day / 7)                                        AS cycle_week,
+       LEAST(4, CEIL(cycle_day / 7))                              AS cycle_week,
        COUNT(*)                                                   AS sessions,
-       ROUND(AVG(energy_level), 2)                                AS avg_energy,
-       ROUND(AVG(perceived_effort), 2)                            AS avg_effort,
+       ROUND(AVG(fatigue), 2)                                     AS avg_fatigue,
+       ROUND(AVG(perceived_effort), 2)                            AS avg_session_rpe,
+       ROUND(AVG(session_load), 0)                                AS avg_session_load,
        ROUND(100.0 * SUM(status = 'COMPLETED') / COUNT(*), 0)     AS completion_pct
 FROM   session_logs
 WHERE  status <> 'PLANNED'
   AND  cycle_day IS NOT NULL
-GROUP  BY user_id, CEIL(cycle_day / 7);
+GROUP  BY user_id, LEAST(4, CEIL(cycle_day / 7));
 
 
 -- Part 1 / Part 7: cycle history with lengths already computed.

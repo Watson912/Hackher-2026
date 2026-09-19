@@ -1,6 +1,6 @@
 # HealthHer — Part 3: Data Layer
 
-MySQL 8.0. Four tables on top of the existing `users` table, plus seed data
+MySQL 8.0. Eight tables on top of the existing `users` table, plus seed data
 for one demo user with two cycles of history already logged.
 
 ## Run order (dBeaver: open file, pick the `herbalance` connection, Execute script / Alt+X)
@@ -8,14 +8,19 @@ for one demo user with two cycles of history already logged.
 | # | File | What it does |
 |---|------|--------------|
 | 1 | `schema.sql` | Existing schema. Creates `herbalance` + `users`. |
-| 2 | `healthher_01_schema.sql` | The four HealthHer tables + 5 helper views. |
+| 2 | `healthher_01_schema.sql` | The eight HealthHer tables + 5 helper views. |
 | 3 | `healthher_02_seed.sql` | Demo user Maya Chen with a full history. |
 | 4 | `healthher_03_queries.sql` | Not required — the query cookbook for Parts 1–7. |
+| – | `healthher_04_migrate_session_ratings.sql` | Only for a database built before 2026-09-19 that you want to keep: adds the new columns and tables in place. Then re-run step 3. |
 
-Steps 2 and 3 are safe to re-run. Step 2 drops and recreates only the four
-HealthHer tables; step 3 deletes and re-inserts only `demo@healthher.app`.
+Steps 2 and 3 are safe to re-run. Step 2 drops and recreates only the eight
+HealthHer tables (so every onboarded user loses their profile); step 3 deletes
+and re-inserts only `demo@healthher.app`.
 
-## The four tables
+From the `api` folder you can also run any of these without dBeaver:
+`npx tsx scripts/run-sql.ts ../database/healthher_02_seed.sql`.
+
+## The eight tables
 
 | Table | One row per | Owned by |
 |-------|-------------|----------|
@@ -23,6 +28,15 @@ HealthHer tables; step 3 deletes and re-inserts only `demo@healthher.app`.
 | `cycles` | menstrual cycle | Part 1 |
 | `training_plans` | generated week | Part 2 |
 | `session_logs` | session (planned **and** logged) | Part 2 creates, Part 6 updates, Part 7 reads |
+| `exercise_logs` | exercise she logged in a session: weight, every set done, RPE (Borg CR-10) | Today writes it, the plan generator reads her latest per exercise for the next load |
+| `planned_exercises` | exercise in a planned session: sets, reps, target RPE, the suggested load and why | Written every time the plan is regenerated; Today and the Plan view read it |
+| `exercise_swaps` | exercise she swapped out, and what she does instead | Today's Swap button writes it; the plan generator uses her pick in every future session |
+| `user_equipment` | equipment item she ticked in onboarding | Onboarding writes it; no rows means the `equipment_tier` preset applies |
+
+A logged session carries the two validated ratings the app asks for:
+`perceived_effort` is session RPE on the Borg CR-10 scale (0–10) and
+`fatigue` is the Hooper Index fatigue item (1–7). `session_load` is a
+generated column, RPE × minutes (Foster's session-RPE method).
 
 A session row is inserted as `status = 'PLANNED'` when the plan is generated,
 then updated in place when she logs it. There is no separate "planned" table.
@@ -48,17 +62,22 @@ plans, 43 logged sessions, 3 upcoming.
 always lands on cycle day 12 (late follicular): two thirds of the wheel is
 filled in and there is a session waiting to be logged.
 
-The logged energy scores are shaped so Part 7 finds a real pattern. The
-textbook says energy holds up through week 3 (days 15-21); Maya crashes
-straight after ovulation, from day 17. Every other week is close to textbook,
-so the one difference is unmistakable:
+The logged ratings are shaped so Insights finds a real pattern. The default
+expects her most fatigued in week 4 (the late luteal deload week); Maya's
+fatigue peaks straight after ovulation, days 17-21, and those sessions felt
+about 2.4 RPE points harder than planned. Every other week is within a point
+of the default, so the one difference is unmistakable:
 
 ```
-week 1   2.75   (textbook 3.0)   -0.25
-week 2   4.54   (textbook 4.5)   +0.04
-week 3   2.90   (textbook 4.0)   -1.10   <- her early crash
-week 4   2.25   (textbook 2.5)   -0.25
+         fatigue (1-7)   default   difference
+week 1   4.25            3.5       +0.75
+week 2   2.23            2.5       -0.27
+week 3   4.60            3.0       +1.60   <- her hardest-feeling week
+week 4   4.25            4.5       -0.25
 ```
+
+A week moves once it has 3 rated sessions and a gap of 1 point or more, so
+week 3 is dialed down 20% and the rest stay on the default.
 
 Today is cycle day 12, so the adjusted week (days 15-21) is her upcoming one.
 

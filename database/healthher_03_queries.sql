@@ -148,7 +148,8 @@ SELECT session_date,
        planned_intensity,
        load_score,
        status,
-       energy_level,
+       fatigue,
+       session_load,
        session_date = CURDATE() AS is_today
 FROM   v_cycle_wheel
 WHERE  user_id = @uid
@@ -173,19 +174,37 @@ WHERE  c.user_id = @uid AND c.cycle_end_date IS NULL;
 -- 6a. Today's card.
 SELECT * FROM v_today_session WHERE user_id = @uid;
 
--- 6b. The three-tap log: completed / energy / effort.
+-- 6b. The three-tap log: how it went / session RPE (Borg CR-10, 0-10) /
+--     fatigue (Hooper, 1-7). Only status is required. session_load
+--     (RPE x minutes) fills itself in.
 -- UPDATE session_logs
 -- SET    status              = 'COMPLETED',
---        energy_level        = 4,
 --        perceived_effort    = 7,
+--        fatigue             = 3,
 --        actual_duration_min = 55,
 --        logged_at           = NOW()
 -- WHERE  session_log_id = ?;
 
 -- 6c. Skipping is a log too, keep the row so Part 7 sees the gap.
 -- UPDATE session_logs
--- SET    status = 'SKIPPED', energy_level = 2, logged_at = NOW()
+-- SET    status = 'SKIPPED', fatigue = 5, logged_at = NOW()
 -- WHERE  session_log_id = ?;
+
+-- 6d. Today's routine: the exercises, sets, reps and suggested load
+--     (with the reason), in order.
+SELECT pe.position, pe.exercise_id, pe.swapped_from, pe.sets, pe.reps, pe.target_rpe,
+       pe.load_text, pe.load_reason
+FROM   planned_exercises pe
+JOIN   session_logs s ON s.session_log_id = pe.session_log_id
+WHERE  s.user_id = @uid AND s.session_date = CURDATE()
+ORDER  BY pe.position;
+
+-- 6e. Her lift history for one exercise, newest first: what the next
+--     suggested load is worked out from.
+SELECT log_date, load_kg, completed, rpe
+FROM   exercise_logs
+WHERE  user_id = @uid AND exercise_id = 'back_squat'
+ORDER  BY log_date DESC;
 
 
 -- =====================================================================
@@ -199,24 +218,25 @@ FROM   session_logs
 WHERE  user_id = @uid AND status <> 'PLANNED';
 
 
--- 7b. THE HEADLINE. Her energy by week of cycle against the textbook
---     curve (same numbers as api/src/core/rules.json). The textbook
---     says energy is lowest on her period, peaks around ovulation and
---     holds up through week 3 before the late-luteal dip. The seeded
---     user crashes straight after ovulation, a week early: week 3 is
---     the "your pattern is different" line.
+-- 7b. THE HEADLINE. Her fatigue (Hooper, 1-7) by week of cycle against
+--     the default curve (same numbers as api/src/core/rules.json). The
+--     default expects her most fatigued in week 4, the late luteal
+--     deload week. The seeded user is most fatigued in week 3, straight
+--     after ovulation: that's the "your hardest week is somewhere else"
+--     line. Session load is Foster's RPE x minutes.
 SELECT w.cycle_week,
        w.sessions,
-       w.avg_energy                                   AS your_energy,
-       t.textbook_energy,
-       ROUND(w.avg_energy - t.textbook_energy, 2)     AS difference,
+       w.avg_fatigue                                  AS your_fatigue,
+       t.default_fatigue,
+       ROUND(w.avg_fatigue - t.default_fatigue, 2)    AS difference,
+       w.avg_session_rpe,
+       w.avg_session_load,
        w.completion_pct
 FROM   v_cycle_week_performance w
-JOIN   (SELECT 1 AS cycle_week, 3.0 AS textbook_energy UNION ALL
-        SELECT 2, 4.5 UNION ALL
-        SELECT 3, 4.0 UNION ALL
-        SELECT 4, 2.5 UNION ALL
-        SELECT 5, 2.5) t ON t.cycle_week = w.cycle_week
+JOIN   (SELECT 1 AS cycle_week, 3.5 AS default_fatigue UNION ALL
+        SELECT 2, 2.5 UNION ALL
+        SELECT 3, 3.0 UNION ALL
+        SELECT 4, 4.5) t ON t.cycle_week = w.cycle_week
 WHERE  w.user_id = @uid
 ORDER  BY w.cycle_week;
 
@@ -226,30 +246,27 @@ SELECT phase,
        sessions_planned,
        sessions_completed,
        completion_pct,
-       avg_energy,
-       avg_effort,
+       avg_fatigue,
+       avg_session_rpe,
+       avg_session_load,
        avg_minutes
 FROM   v_phase_performance
 WHERE  user_id = @uid
-ORDER  BY FIELD(phase, 'MENSTRUAL','FOLLICULAR','OVULATORY','LUTEAL','SUPPRESSED','UNKNOWN');
+ORDER  BY FIELD(phase, 'MENSTRUAL','FOLLICULAR','OVULATORY','EARLY_LUTEAL','LATE_LUTEAL','SUPPRESSED','UNKNOWN');
 
 
--- 7d. The one-line callout: the week where she differs most from the
---     textbook, and in which direction.
-SELECT CONCAT('Your energy in week ', g.cycle_week, ' runs ',
-              ABS(g.difference), CASE WHEN g.difference < 0 THEN ' below' ELSE ' above' END,
-              ' the textbook (', g.avg_energy, ' vs ', g.textbook_energy, ')') AS headline,
-       g.cycle_week, g.avg_energy, g.textbook_energy, g.difference,
-       g.sessions         AS sessions_behind_it
-FROM   (SELECT w.cycle_week, w.avg_energy, w.sessions, t.textbook_energy,
-               ROUND(w.avg_energy - t.textbook_energy, 2) AS difference
-        FROM   v_cycle_week_performance w
-        JOIN   (SELECT 1 AS cycle_week, 3.0 AS textbook_energy UNION ALL
-                SELECT 2, 4.5 UNION ALL SELECT 3, 4.0 UNION ALL
-                SELECT 4, 2.5 UNION ALL SELECT 5, 2.5) t ON t.cycle_week = w.cycle_week
-        WHERE  w.user_id = @uid
-        ORDER  BY ABS(w.avg_energy - t.textbook_energy) DESC
-        LIMIT  1) g;
+-- 7d. The one-line callout: her hardest-feeling week (highest average
+--     fatigue) next to the week the default expects to feel hardest (4).
+SELECT CONCAT('Your hardest-feeling week is week ', h.cycle_week,
+              CASE WHEN h.cycle_week = 4 THEN ', the same as the default'
+                   ELSE ', not week 4 as the default expects' END,
+              ' (fatigue ', h.avg_fatigue, ' of 7)') AS headline,
+       h.cycle_week, h.avg_fatigue, h.avg_session_rpe, h.avg_session_load,
+       h.sessions AS sessions_behind_it
+FROM   v_cycle_week_performance h
+WHERE  h.user_id = @uid AND h.sessions >= 3
+ORDER  BY h.avg_fatigue DESC, h.cycle_week
+LIMIT  1;
 
 
 -- 7e. Where plans fall apart, so the generator can back off there.

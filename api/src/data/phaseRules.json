@@ -1,0 +1,241 @@
+{
+  "meta": {
+    "version": 1,
+    "disclaimer": "Fitness and nutrition guidance only. Not medical advice, not diagnostic. Cycle phase windows are estimates based on reported dates.",
+    "evidenceNote": "Phase-based training is a reasonable framework, not settled science. Several strong reviews find phase effects on strength performance are small or absent at group level, while individual variation is large. The Apple Women's Health Study, the largest dataset available, found women exercise essentially the same amount in both halves of the cycle (21.0 vs 20.9 minutes per day) and states plainly that there is not yet enough evidence to say hormone levels should change exercise plans. That is exactly why this app treats the default plan as a starting hypothesis and prioritises her own logged response over the textbook pattern.",
+    "intensityScale": ["deload", "moderate", "high", "peak"]
+  },
+
+  "intensityPrescriptions": {
+    "deload": {
+      "compound": { "sets": 2, "reps": "8-10", "rpe": 5, "restSec": 120, "loadPct": 0.6 },
+      "accessory": { "sets": 2, "reps": "10-12", "rpe": 5, "restSec": 60, "loadPct": 0.6 },
+      "conditioning": { "sets": 1, "reps": "15-20 min steady", "rpe": 4, "restSec": 0, "loadPct": null },
+      "recovery": { "sets": 1, "reps": "20-30 min", "rpe": 2, "restSec": 0, "loadPct": null }
+    },
+    "moderate": {
+      "compound": { "sets": 3, "reps": "8-10", "rpe": 7, "restSec": 150, "loadPct": 0.75 },
+      "accessory": { "sets": 3, "reps": "10-12", "rpe": 7, "restSec": 75, "loadPct": 0.75 },
+      "conditioning": { "sets": 1, "reps": "20-30 min steady", "rpe": 6, "restSec": 0, "loadPct": null },
+      "recovery": { "sets": 1, "reps": "20-30 min", "rpe": 2, "restSec": 0, "loadPct": null }
+    },
+    "high": {
+      "compound": { "sets": 4, "reps": "5-6", "rpe": 8, "restSec": 180, "loadPct": 0.85 },
+      "accessory": { "sets": 3, "reps": "8-10", "rpe": 8, "restSec": 90, "loadPct": 0.8 },
+      "conditioning": { "sets": 6, "reps": "60s hard / 90s easy", "rpe": 8, "restSec": 90, "loadPct": null },
+      "recovery": { "sets": 1, "reps": "20-30 min", "rpe": 2, "restSec": 0, "loadPct": null }
+    },
+    "peak": {
+      "compound": { "sets": 5, "reps": "3-5", "rpe": 9, "restSec": 210, "loadPct": 0.9 },
+      "accessory": { "sets": 3, "reps": "6-8", "rpe": 8, "restSec": 90, "loadPct": 0.85 },
+      "conditioning": { "sets": 8, "reps": "40s hard / 80s easy", "rpe": 9, "restSec": 80, "loadPct": null },
+      "recovery": { "sets": 1, "reps": "20-30 min", "rpe": 2, "restSec": 0, "loadPct": null }
+    }
+  },
+
+  "phases": [
+    {
+      "id": "menstrual",
+      "label": "Menstrual",
+      "dayRange": [1, 5],
+      "hormoneState": "Estrogen and progesterone both at their lowest. Core temperature back to baseline.",
+      "intensity": "moderate",
+      "volumeModifier": 0.9,
+      "emphasis": "Train normally if you feel fine. Many women report feeling better once bleeding starts than in the days before it. Full-body sessions, moderate load, nothing requiring a maximal effort.",
+      "autoregulation": "If cramping or fatigue is high, drop to the deload prescription for that session rather than skipping it. Exercise is safe during menstruation and several forms of it have been shown to reduce period pain, so movement usually helps cramps rather than worsening them.",
+      "nutrition": [
+        "Prioritise iron-rich food (red meat, lentils, spinach with vitamin C) across these days.",
+        "Do not under-eat because appetite is low. Fuelling matters more here, not less.",
+        "Keep fluid intake up, blood volume is lower."
+      ],
+      "citations": ["mcnulty2020", "bruinvels2016", "colenso2023", "appleWHS2025"],
+      "color": "#B3364A"
+    },
+    {
+      "id": "follicular",
+      "label": "Follicular",
+      "dayRange": [6, 11],
+      "hormoneState": "Estrogen climbing steadily, progesterone still low. Body temperature low, carbohydrate use efficient.",
+      "intensity": "peak",
+      "volumeModifier": 1.0,
+      "emphasis": "The peak week. This is where heavy attempts and rep records go. Estrogen and endogenous testosterone are both high, which is the best-supported window for maximal strength work, and one controlled trial found resistance training concentrated in the follicular phase produced greater strength and muscle volume gains than the same work in the luteal phase.",
+      "autoregulation": "If your logged energy has been high two cycles running, this is the phase to extend rather than the ovulatory one.",
+      "nutrition": [
+        "Carbohydrate around training is used well in this phase, so fuel before hard sessions.",
+        "Standard protein target, spread across the day.",
+        "Good phase to attempt a slightly higher training load if your goal is strength."
+      ],
+      "citations": ["oosthuyse2010", "mcnulty2020", "sims2018", "wen2025"],
+      "color": "#C9736A"
+    },
+    {
+      "id": "ovulatory",
+      "label": "Ovulatory",
+      "dayRange": [12, 16],
+      "hormoneState": "Estrogen peaks then drops sharply, progesterone begins rising. Pain tolerance often reported highest.",
+      "intensity": "high",
+      "volumeModifier": 0.95,
+      "emphasis": "Strong training week, but not the week to chase records. Hold intensity high and let the peak attempts sit in the late follicular phase instead.",
+      "autoregulation": "Two separate reasons to ease off maximal work here. Objectively measured activity data shows time spent at vigorous and above, and total energy expenditure, hit their lowest point at ovulation in athletes with hormonally confirmed cycles. Separately, greater joint laxity around this window has been linked in older work to higher ACL injury rates, so warm up thoroughly and control landings and direction changes.",
+      "nutrition": [
+        "Fuel properly before hard sessions, do not train heavy fasted.",
+        "Hydrate well, appetite can dip slightly around ovulation.",
+        "Creatine, if you take it, stays daily regardless of phase."
+      ],
+      "citations": ["mcnulty2020", "wojtys1998", "colenso2023", "accelerometry2026"],
+      "color": "#D99A5B"
+    },
+    {
+      "id": "early_luteal",
+      "label": "Early Luteal",
+      "dayRange": [17, 23],
+      "hormoneState": "Progesterone dominant, estrogen moderate. Core temperature runs a few tenths of a degree higher.",
+      "intensity": "high",
+      "volumeModifier": 0.95,
+      "emphasis": "Hold volume, ease off maximal attempts. Good window for hypertrophy rep ranges and steady aerobic work rather than peak intensity.",
+      "autoregulation": "Expect the same weight to feel slightly harder. That is a temperature and perceived-effort shift, not lost strength. Rate sessions by RPE rather than by load.",
+      "nutrition": [
+        "Increase protein slightly, progesterone raises protein breakdown.",
+        "Heat and humidity hit harder in this phase, so add electrolytes for long or hot sessions.",
+        "Taking in carbohydrate during longer sessions appears to blunt the cycle's effect on aerobic performance, so fuel during endurance work rather than after.",
+        "Appetite typically rises here. Eat to it rather than fighting it."
+      ],
+      "citations": ["oosthuyse2010", "charkoudian2014", "sims2018", "wen2025"],
+      "color": "#3F8F5A"
+    },
+    {
+      "id": "late_luteal",
+      "label": "Late Luteal",
+      "dayRange": [24, 28],
+      "hormoneState": "Both hormones falling toward baseline. Sleep quality often drops, perceived effort often rises.",
+      "intensity": "deload",
+      "volumeModifier": 0.75,
+      "emphasis": "Planned deload. Same movements, lighter load, longer rest, more room between sets. Swap one lifting day for mobility or an easy walk if you want to.",
+      "autoregulation": "This is scheduled recovery, not a bad week. Deloading here means you arrive at the next follicular phase ready to build instead of dragging.",
+      "nutrition": [
+        "Protein stays high, it helps with satiety as well as recovery.",
+        "Magnesium and steady carbohydrate intake may help with sleep and cramping.",
+        "Do not cut calories this week. Under-fuelling here is what turns a deload into a stall."
+      ],
+      "citations": ["oosthuyse2010", "sims2018", "elliottsale2021"],
+      "color": "#4F6FB3"
+    }
+  ],
+
+  "steadyState": {
+    "id": "steady",
+    "label": "Steady (hormonal contraception)",
+    "appliesWhen": "User reports combined pill, hormonal IUD, implant, injection or ring.",
+    "hormoneState": "Most hormonal contraception suppresses the natural cycle, so there is no follicular and luteal pattern to plan around. Any bleeding on the pill is a withdrawal bleed, not a true period.",
+    "planningApproach": "Run a standard four-week undulating block: moderate, high, peak, deload. The app still asks how each session felt and builds her personal pattern from logged data, since some users on hormonal contraception still report cyclical symptoms.",
+    "blockSequence": ["moderate", "high", "peak", "deload"],
+    "citations": ["elliottsale2021", "sims2018"],
+    "color": "#8C7E9C"
+  },
+
+  "irregularHandling": {
+    "trigger": "Reported cycle length varies by more than 7 days, or user reports PCOS or irregular cycles.",
+    "approach": "Widen phase bands proportionally to reported average length and lower displayed confidence. Show phase as a range rather than a single day. Fall back to the steadyState four-week block if variation exceeds 14 days.",
+    "flagCopy": "Your cycles vary enough that phase estimates are rough. The plan still works, and the app will tighten its estimate as you log more cycles.",
+    "citations": ["elliottsale2021", "appleWHS2025"]
+  },
+
+  "flags": [
+    {
+      "id": "short_cycle",
+      "condition": "Three or more logged cycles shorter than 21 days.",
+      "copy": "Your last few cycles have been shorter than 21 days. That is worth mentioning to a doctor at some point, it is not something this app can interpret.",
+      "severity": "info"
+    },
+    {
+      "id": "long_cycle",
+      "condition": "Three or more logged cycles longer than 35 days.",
+      "copy": "Your recent cycles have run longer than 35 days. Worth raising with a doctor, purely so someone qualified has the picture.",
+      "severity": "info"
+    },
+    {
+      "id": "high_variation",
+      "condition": "Cycle length varies by more than 14 days across logged cycles.",
+      "copy": "Your cycle length varies a lot. The plan will use a steady block instead of phase timing until it settles.",
+      "severity": "info"
+    },
+    {
+      "id": "persistent_low_energy",
+      "condition": "Logged energy at or below 2 of 5 for more than 60 percent of sessions across two full cycles.",
+      "copy": "Your energy has been low across most sessions for two cycles. That can be training load, sleep, or under-fuelling. Worth a conversation with a doctor or dietitian rather than pushing through.",
+      "severity": "attention"
+    }
+  ],
+
+  "references": {
+    "wen2025": {
+      "citation": "Wen, Gao, Wang & Zhao (2025). Exercise performance at different phases of the menstrual cycle: measurements, differences, and mechanisms - a narrative review. Frontiers in Endocrinology, 16:1448686.",
+      "url": "https://www.frontiersin.org/journals/endocrinology/articles/10.3389/fendo.2025.1448686/full",
+      "finding": "Across dozens of studies: anaerobic performance appears unaffected by cycle phase; aerobic performance tends to be better in the follicular than the luteal phase; maximal strength tends to be poorest in the luteal phase. Cites a trial in which resistance training concentrated in the follicular phase produced greater strength and muscle volume gains than the same training in the luteal phase.",
+      "evidenceStrength": "moderate",
+      "honestCaveat": "A narrative review, and the authors stress that findings conflict, samples are small, and most studies used date or temperature methods rather than blood hormones to identify phase. They also note that an adequate warm-up appears to offset the luteal temperature difference, and that carbohydrate intake during exercise reduces the cycle's effect on aerobic performance. Both are useful practical levers for the app."
+    },
+    "appleWHS2025": {
+      "citation": "Apple Women's Health Study, Harvard T.H. Chan School of Public Health (May 2025). Exploring Exercise Habits by Menstrual Cycle Phase.",
+      "url": "https://hsph.harvard.edu/research/apple-womens-health-study/study-updates/exploring-exercise-habits-by-menstrual-cycle-phase/",
+      "finding": "110,740 participants, 22.85 million logged workouts. Median daily exercise was 21.0 minutes in the follicular phase and 20.9 minutes in the luteal phase, effectively identical. Participants with regular cycles averaged 20.6 minutes daily versus 18.6 for those with irregular cycles. Walking, cycling and running were the most logged activities.",
+      "evidenceStrength": "strong",
+      "honestCaveat": "The largest dataset in this space, and it states directly that there is not yet enough evidence to say hormone levels should change someone's exercise plans, and that people with irregular cycles may not have a reliable hormone pattern to plan around. Measures behaviour rather than capacity, so it does not settle whether phase-aware programming helps, but it is the strongest check on overclaiming. Show it in the app."
+    },
+    "accelerometry2026": {
+      "citation": "Daily physical activity patterns across the menstrual cycle in eumenorrheic female athletes: an accelerometry-based study (2026). Frontiers in Sports and Active Living, 10.3389/fspor.2026.1793624.",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13429725/",
+      "finding": "20 female athletes tracked across one full cycle with wrist accelerometers, phases confirmed by urinary LH and mid-luteal serum progesterone. Sedentary, light and moderate activity did not differ by phase. Time at vigorous, very vigorous and extremely vigorous intensity, and total energy expenditure, were significantly lower during the ovulatory phase.",
+      "evidenceStrength": "moderate",
+      "honestCaveat": "Small (n=20) and measures what athletes chose to do, not what they were capable of. But the hormonal verification is unusually rigorous, and the ovulatory dip is why this app puts the peak week in the late follicular phase rather than at ovulation."
+    },
+    "mcnulty2020": {
+      "citation": "McNulty et al. (2020). The effects of menstrual cycle phase on exercise performance in eumenorrheic women: a systematic review and meta-analysis. Sports Medicine.",
+      "finding": "Performance was trivially reduced in the early follicular phase compared to other phases, but effects were small and between-study variation was high.",
+      "evidenceStrength": "moderate",
+      "honestCaveat": "The authors themselves describe the effect as trivial at group level and recommend individualised rather than blanket phase-based programming."
+    },
+    "colenso2023": {
+      "citation": "Colenso-Semple et al. (2023). Current evidence shows no influence of women's menstrual cycle phase on acute strength performance or adaptations. Frontiers in Sports and Active Living.",
+      "finding": "Reviewed the literature and argued there is no reliable effect of cycle phase on acute strength performance or training adaptation.",
+      "evidenceStrength": "contested",
+      "honestCaveat": "This is the strongest counterargument to the whole premise and should be shown in the app, not hidden. It is why the product frames the default plan as a starting point and prioritises her own logged data."
+    },
+    "oosthuyse2010": {
+      "citation": "Oosthuyse & Bosch (2010). The effect of the menstrual cycle on exercise metabolism. Sports Medicine.",
+      "finding": "Cycle phase influences substrate metabolism, with greater fat oxidation and altered carbohydrate availability reported in the luteal phase.",
+      "evidenceStrength": "moderate",
+      "honestCaveat": "Metabolic shifts are better established than performance shifts, but practical magnitude for a recreational lifter is modest."
+    },
+    "sims2018": {
+      "citation": "Sims & Heather (2018). Myths and methodologies: reducing scientific design ambiguity in studies comparing sexes and/or menstrual cycle phases. Experimental Physiology.",
+      "finding": "Argues female physiology differs enough that male-derived protocols should not be applied unchanged, and that studies must verify cycle phase properly.",
+      "evidenceStrength": "moderate",
+      "honestCaveat": "This is a methodological and advocacy paper, strong on the case for studying women properly, lighter on prescriptive programming."
+    },
+    "charkoudian2014": {
+      "citation": "Charkoudian & Stachenfeld (2014). Reproductive hormone influences on thermoregulation in women. Comprehensive Physiology.",
+      "finding": "Progesterone raises resting core temperature and shifts sweating and vasodilation thresholds upward in the luteal phase.",
+      "evidenceStrength": "strong",
+      "honestCaveat": "Well established. Most relevant for heat, humidity and long sessions."
+    },
+    "bruinvels2016": {
+      "citation": "Bruinvels et al. (2016). Sport, exercise and the menstrual cycle: where is the research? British Journal of Sports Medicine.",
+      "finding": "Highlighted heavy menstrual bleeding and iron deficiency as common and under-addressed issues in exercising women.",
+      "evidenceStrength": "moderate",
+      "honestCaveat": "Supports the iron guidance. Iron status is a blood-test question for a doctor, not something the app estimates."
+    },
+    "wojtys1998": {
+      "citation": "Wojtys et al. (1998). Association between the menstrual cycle and anterior cruciate ligament injuries in female athletes. American Journal of Sports Medicine.",
+      "finding": "Reported a higher proportion of ACL injuries occurring around the ovulatory phase.",
+      "evidenceStrength": "weak",
+      "honestCaveat": "Older, small, and subsequent work is inconsistent. Justifies a cautious warm-up note, nothing stronger."
+    },
+    "elliottsale2021": {
+      "citation": "Elliott-Sale et al. (2021). Methodological considerations for studies in sport and exercise science with women as participants. Sports Medicine.",
+      "finding": "Sets out standards for classifying cycle phase and hormonal contraception use in research, and documents how often past studies got this wrong.",
+      "evidenceStrength": "strong",
+      "honestCaveat": "Best source for why the contraception and irregular-cycle cases need separate handling rather than being forced into a 28-day model."
+    }
+  }
+}
