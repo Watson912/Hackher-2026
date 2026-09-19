@@ -86,10 +86,12 @@ export function computeCycle(input: CycleInput): CycleState {
   const { lastPeriodStart, cycleLength, periodLength, regularity, suppressed, today } = input;
 
   if (!lastPeriodStart) {
+    // Hormonal birth control without a period date is still a known state:
+    // flat phases. Anyone else without a date is unknown.
     return {
-      phase: 'UNKNOWN', cycleDay: null, cycleWeek: null, cycleLength,
+      phase: suppressed ? 'SUPPRESSED' : 'UNKNOWN', cycleDay: null, cycleWeek: null, cycleLength,
       ovulationDay: null, nextPeriodDate: null, late: false,
-      confidence: 0, days: [],
+      confidence: suppressed ? 1 : 0, days: [],
     };
   }
 

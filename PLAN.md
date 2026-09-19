@@ -240,20 +240,21 @@ something that could be demoed if time ran out right there.
 5. ✅ **Part 2 personal layer.** Plans now carry textbook, adjustment and reason.
 6. ✅ **Part 3:** no schema change needed (see Part 3). Endpoints are live:
    `/api/today`, `/api/insights`, `/api/plans/preview`.
-7. **Part 7 insights**, including the pattern chart and "what we changed".
+7. ✅ **Part 7 insights**, including the pattern chart and "what we changed".
    This is the payoff screen, so it comes before anything else visual.
 
 **Should have: the demo flows**
 
-8. **Part 6 today view + three-tap logging** with the feedback line.
-9. **Part 5 cycle wheel**, a basic version first: phases, today and load.
-10. **Part 4 onboarding.**
+8. ✅ **Part 6 today view + three-tap logging** with the feedback line.
+9. ✅ **Part 5 cycle wheel**, a basic version first: phases, today and load.
+10. ✅ **Part 4 onboarding.** Plus a "See the demo" button that reloads Maya's
+    seed data so her dates always line up with the demo day.
 
 **Nice to have: polish, in this order**
 
-11. Wheel polish, including the textbook ghost ring. This is the pitch
+11. ✅ Wheel polish, including the textbook ghost ring. This is the pitch
     screenshot.
-12. The learning timeline in Part 7.
+12. ✅ The learning timeline in Part 7.
 13. Cycle-length learning in Part 1.
 14. LLM-written `adjustment_reason`.
 

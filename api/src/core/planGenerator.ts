@@ -1,7 +1,7 @@
 // Part 2: the plan generator. Textbook layer (rules.json) plus personal
 // layer (the learning adjustment for each cycle week). Every session keeps
 // its textbook version so the UI can show "Textbook plan / Your plan".
-import { addDays, computeCycle, dayInfo } from './cycleEngine.ts';
+import { addDays, computeCycle, dayInfo, daysBetween } from './cycleEngine.ts';
 import { WEEKS, type LearnedPattern } from './learning.ts';
 import rules from './rules.json' with { type: 'json' };
 import type { CycleInput, CycleWeek, Intensity, IsoDate, Phase } from './types.ts';
@@ -47,6 +47,7 @@ export interface WeekPlan {
 export interface PlanInput {
   cycle: CycleInput;              // cycle.today = the day the plan is generated
   weekStart: IsoDate;
+  length?: number;                // days in the block, default 7 (see planBlocks)
   goal: Goal;
   daysPerWeek: number;
   pattern: LearnedPattern | null; // null = textbook only
@@ -88,19 +89,20 @@ function mostCommon<T>(xs: T[]): T {
 }
 
 export function generateWeek(input: PlanInput): WeekPlan {
-  const { cycle, weekStart, goal, daysPerWeek, pattern } = input;
+  const { cycle, weekStart, length = 7, goal, daysPerWeek, pattern } = input;
   const state = computeCycle(cycle);
 
   // Learning only applies when there are natural phases to learn from.
   const learns = pattern !== null && state.phase !== 'SUPPRESSED' && state.phase !== 'UNKNOWN';
 
-  const days = Array.from({ length: 7 }, (_, i) => {
+  const noCycle: Phase = cycle.suppressed ? 'SUPPRESSED' : 'UNKNOWN';
+  const days = Array.from({ length }, (_, i) => {
     const date = addDays(weekStart, i);
     const info = dayInfo(cycle, date);
     return {
       date,
       cycleDay: info?.day ?? null,
-      phase: (info?.phase ?? 'UNKNOWN') as Phase,
+      phase: (info?.phase ?? noCycle) as Phase,
       week: info?.week ?? null,
     };
   });
@@ -108,7 +110,7 @@ export function generateWeek(input: PlanInput): WeekPlan {
   const offsets = rules.trainingDays[String(Math.min(7, Math.max(1, daysPerWeek))) as '1'];
   const template = rules.goalTemplates[goal] as Slot[];
 
-  const sessions: PlannedSession[] = offsets.map((offset, n) => {
+  const sessions: PlannedSession[] = offsets.filter((offset) => offset < length).map((offset, n) => {
     const day = days[offset];
     const slot = template[n % template.length];
     const rule = phaseRule(day.phase, day.week);
@@ -156,4 +158,34 @@ export function generateWeek(input: PlanInput): WeekPlan {
     confidence: state.confidence,
     sessions,
   };
+}
+
+export interface PlanBlock {
+  start: IsoDate;
+  length: number;
+}
+
+/**
+ * The plan blocks covering [from, to], aligned to cycle weeks (days 1-7,
+ * 8-14, 15-21, 22-end) so every screen agrees on which days are trained.
+ * The last block runs to the end of the cycle, so a 29-day cycle gets an
+ * 8-day week 4. Without a period date, blocks are plain 7-day weeks.
+ */
+export function planBlocks(cycle: CycleInput, from: IsoDate, to: IsoDate): PlanBlock[] {
+  const blocks: PlanBlock[] = [];
+  let date = from;
+  while (daysBetween(date, to) >= 0) {
+    const info = dayInfo(cycle, date);
+    let block: PlanBlock;
+    if (!info || info.day > cycle.cycleLength) {
+      block = { start: date, length: 7 };
+    } else {
+      const firstDay = (info.week - 1) * 7 + 1;
+      const lastDay = info.week === 4 ? cycle.cycleLength : Math.min(firstDay + 6, cycle.cycleLength);
+      block = { start: addDays(date, firstDay - info.day), length: lastDay - firstDay + 1 };
+    }
+    blocks.push(block);
+    date = addDays(block.start, block.length);
+  }
+  return blocks;
 }

@@ -10,7 +10,7 @@ export const longDate = (date: string) =>
   parse(date).toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })
 
 export const pct = (adjustment: number) => `${Math.round(Math.abs(adjustment) * 100)}%`
-export const titleCase = (s: string) => s.charAt(0) + s.slice(1).toLowerCase()
+export const titleCase = (s: string | null | undefined) => (s ? s.charAt(0) + s.slice(1).toLowerCase() : '')
 
 /** "20% lighter" or "10% harder", for a learning adjustment. */
 export const change = (adjustment: number) => `${pct(adjustment)} ${adjustment < 0 ? 'lighter' : 'harder'}`

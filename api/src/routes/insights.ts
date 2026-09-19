@@ -1,21 +1,22 @@
 import { Router } from 'express';
 import { addDays, daysBetween, dayInfo } from '../core/cycleEngine.ts';
 import { learnedPattern, WEEKS, type WeekPattern } from '../core/learning.ts';
-import { generateWeek } from '../core/planGenerator.ts';
+import { generateWeek, planBlocks } from '../core/planGenerator.ts';
 import rules from '../core/rules.json' with { type: 'json' };
-import { loadDemo } from '../demoUser.ts';
+import { loadUser } from '../users.ts';
 
 export const insightsRouter = Router();
 
 // Part 7: what we learned, and what we changed because of it.
 insightsRouter.get('/insights', async (_req, res) => {
-  const { today, goal, daysPerWeek, cycleInput, cycle, sessions, pattern } = await loadDemo();
+  const { today, goal, daysPerWeek, cycleInput, cycle, sessions, pattern } = await loadUser(res.locals.userId);
   const weeks = WEEKS.map((w) => pattern[w]);
   const logged = sessions.filter((s) => s.status !== 'PLANNED');
 
   // The headline is the week that differs most from the textbook, among
-  // weeks with enough sessions to trust.
-  const trusted = weeks.filter((w) => w.sessions >= rules.learning.minSessions && w.energyDelta !== null);
+  // weeks with enough sessions to trust and a gap big enough to act on.
+  const trusted = weeks.filter((w) => w.sessions >= rules.learning.minSessions && w.energyDelta !== null
+    && Math.abs(w.energyDelta) >= rules.learning.threshold);
   const headline: WeekPattern | null =
     [...trusted].sort((a, b) => Math.abs(b.energyDelta!) - Math.abs(a.energyDelta!))[0] ?? null;
 
@@ -42,12 +43,16 @@ insightsRouter.get('/insights', async (_req, res) => {
     if (startsWeek) nextAdjustedWeek = { start: info.date, week: info.week };
   }
 
-  const preview = nextAdjustedWeek
-    ? generateWeek({ cycle: cycleInput, weekStart: nextAdjustedWeek.start, goal, daysPerWeek, pattern })
+  const block = nextAdjustedWeek && planBlocks(cycleInput, nextAdjustedWeek.start, nextAdjustedWeek.start)[0];
+  const preview = block
+    ? generateWeek({ cycle: cycleInput, weekStart: block.start, length: block.length, goal, daysPerWeek, pattern })
     : null;
 
+  const learns = cycle.phase !== 'SUPPRESSED' && cycle.phase !== 'UNKNOWN';
   res.json({
     today,
+    learns,
+    minSessions: rules.learning.minSessions,
     loggedSessions: logged.length,
     weeks,
     headline,

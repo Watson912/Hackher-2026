@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { dayInfo } from './cycleEngine.ts';
 import fixture from './fixtures/maya-sessions.json' with { type: 'json' };
 import { learnedPattern, type LoggedSession } from './learning.ts';
-import { generateWeek, intensityFor, phaseRule } from './planGenerator.ts';
+import { generateWeek, intensityFor, phaseRule, planBlocks } from './planGenerator.ts';
 import type { CycleInput } from './types.ts';
 
 const cycle: CycleInput = {
@@ -19,17 +19,17 @@ const WEEK_3_START = '2026-09-22'; // cycle day 15
 describe('textbook layer', () => {
   const plan = generateWeek({ cycle, weekStart: WEEK_3_START, goal: 'STRENGTH', daysPerWeek: 4, pattern: null });
 
-  it('schedules 4 sessions on the configured days', () => {
-    expect(plan.sessions.map((s) => s.date)).toEqual(['2026-09-22', '2026-09-24', '2026-09-25', '2026-09-27']);
+  it('schedules 4 sessions on days 1, 2, 4 and 5 of the block', () => {
+    expect(plan.sessions.map((s) => s.date)).toEqual(['2026-09-22', '2026-09-23', '2026-09-25', '2026-09-26']);
     expect(plan.sessions.map((s) => s.slot)).toEqual(['STRENGTH', 'CARDIO', 'STRENGTH', 'STRENGTH']);
   });
 
   it('follows the phase: heavy at ovulation, moderate in early luteal', () => {
     expect(plan.sessions.map((s) => [s.cycleDay, s.phase, s.intensity])).toEqual([
       [15, 'OVULATORY', 'HIGH'],
-      [17, 'LUTEAL', 'MODERATE'],
+      [16, 'OVULATORY', 'HIGH'],
       [18, 'LUTEAL', 'MODERATE'],
-      [20, 'LUTEAL', 'MODERATE'],
+      [19, 'LUTEAL', 'MODERATE'],
     ]);
   });
 
@@ -61,7 +61,7 @@ describe('personal layer: Maya\'s week 3', () => {
   it('dials every week-3 session down one step', () => {
     expect(plan.sessions.map((s) => [s.textbook.intensity, s.intensity])).toEqual([
       ['HIGH', 'MODERATE'],
-      ['MODERATE', 'LOW'],
+      ['HIGH', 'MODERATE'],
       ['MODERATE', 'LOW'],
       ['MODERATE', 'LOW'],
     ]);
@@ -76,8 +76,8 @@ describe('personal layer: Maya\'s week 3', () => {
 
   it('says why', () => {
     expect(plan.personalAdjustment).toBe(-0.2);
-    expect(plan.textbookIntensityModifier).toBe(0.95);
-    expect(plan.intensityModifier).toBe(0.75);
+    expect(plan.textbookIntensityModifier).toBe(1);
+    expect(plan.intensityModifier).toBe(0.8);
     expect(plan.adjustmentReason).toContain('week 3');
     expect(plan.adjustmentReason).toContain('20% lighter');
   });
@@ -93,6 +93,12 @@ describe('other users', () => {
   it('keeps birth control users flat and ignores learning', () => {
     const plan = generateWeek({ cycle: { ...cycle, suppressed: true }, weekStart: WEEK_3_START, goal: 'STRENGTH', daysPerWeek: 4, pattern });
     expect(plan.sessions.every((s) => s.phase === 'SUPPRESSED' && s.intensity === 'MODERATE' && !s.adjusted)).toBe(true);
+  });
+
+  it('keeps birth control users flat even without a period date', () => {
+    const plan = generateWeek({ cycle: { ...cycle, suppressed: true, lastPeriodStart: null }, weekStart: WEEK_3_START, goal: 'STRENGTH', daysPerWeek: 4, pattern });
+    expect(plan.phase).toBe('SUPPRESSED');
+    expect(plan.sessions.every((s) => s.phase === 'SUPPRESSED' && s.intensity === 'MODERATE')).toBe(true);
   });
 
   it('still produces a plan with no period date', () => {
@@ -123,5 +129,34 @@ describe('helpers', () => {
   it('dayInfo stays late luteal when she is already late', () => {
     const late = { ...cycle, today: '2026-10-10' }; // day 33 of 29
     expect(dayInfo(late, '2026-10-12')).toMatchObject({ day: 35, phase: 'LUTEAL', week: 4 });
+  });
+});
+
+describe('planBlocks', () => {
+  it('aligns blocks to cycle weeks, with an 8-day week 4 on a 29-day cycle', () => {
+    expect(planBlocks(cycle, '2026-09-19', '2026-10-02')).toEqual([
+      { start: '2026-09-15', length: 7 },  // days 8-14, today is day 12
+      { start: '2026-09-22', length: 7 },  // days 15-21
+      { start: '2026-09-29', length: 8 },  // days 22-29
+    ]);
+  });
+
+  it('rolls into the next predicted cycle', () => {
+    expect(planBlocks(cycle, '2026-10-06', '2026-10-08')).toEqual([
+      { start: '2026-09-29', length: 8 },
+      { start: '2026-10-07', length: 7 },
+    ]);
+  });
+
+  it('uses plain 7-day blocks without a period date', () => {
+    expect(planBlocks({ ...cycle, lastPeriodStart: null }, '2026-09-19', '2026-09-30')).toEqual([
+      { start: '2026-09-19', length: 7 },
+      { start: '2026-09-26', length: 7 },
+    ]);
+  });
+
+  it('generates the right number of days for a long block', () => {
+    const plan = generateWeek({ cycle, weekStart: '2026-09-29', length: 8, goal: 'STRENGTH', daysPerWeek: 4, pattern: null });
+    expect(plan.sessions.map((s) => s.cycleDay)).toEqual([22, 23, 25, 26]);
   });
 });

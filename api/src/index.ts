@@ -2,11 +2,13 @@ import 'dotenv/config';
 import cors from 'cors';
 import express, { type ErrorRequestHandler } from 'express';
 import { pool } from './db.ts';
-import { NotFoundError } from './demoUser.ts';
+import { accountRouter } from './routes/account.ts';
 import { insightsRouter } from './routes/insights.ts';
 import { plansRouter } from './routes/plans.ts';
 import { todayRouter } from './routes/today.ts';
 import { userRouter } from './routes/user.ts';
+import { wheelRouter } from './routes/wheel.ts';
+import { NotFoundError, resolveUser } from './users.ts';
 
 const app = express();
 app.use(cors());
@@ -17,8 +19,12 @@ app.get('/api/health', async (_req, res) => {
   res.json({ ok: true, db: 'connected' });
 });
 
+// Creating users (onboarding, demo reset) comes before user resolution.
+app.use('/api', accountRouter);
+app.use('/api', resolveUser);
 app.use('/api', userRouter);
 app.use('/api', todayRouter);
+app.use('/api', wheelRouter);
 app.use('/api', insightsRouter);
 app.use('/api', plansRouter);
 

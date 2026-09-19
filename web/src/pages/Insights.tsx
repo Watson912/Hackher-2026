@@ -22,14 +22,53 @@ export function Insights() {
   if (error) return <p className="error">Couldn't load insights: {error}</p>
   if (!data) return <p className="muted">Loading…</p>
 
-  const { headline, weeks, timeline, preview, nextAdjustedWeek, loggedSessions } = data
+  const { headline, weeks, timeline, preview, nextAdjustedWeek, loggedSessions, learns, minSessions } = data
 
-  if (!headline) {
+  if (!learns) {
     return (
       <section className="card">
-        <h2>Still learning</h2>
-        <p className="muted">Log a few more sessions and we'll show how your cycle compares with the textbook.</p>
+        <h2>Consistent training, by design</h2>
+        <p className="muted">
+          On hormonal birth control there are no natural phases to learn from, so your plan stays steady week to week.
+          We still track your energy and effort so you can see how your training is going.
+        </p>
       </section>
+    )
+  }
+
+  if (!headline) {
+    const ready = weeks.filter((w) => w.sessions >= minSessions)
+    return (
+      <>
+        <section className="hero">
+          <p className="eyebrow">What we've learned so far</p>
+          <h2>{ready.length === 0 ? 'Still learning your cycle' : 'So far, you match the textbook'}</h2>
+          <p className="muted">
+            {ready.length === 0
+              ? `We compare each week of your cycle with the textbook once you've logged ${minSessions} sessions in it. Every log gets us closer.`
+              : `Across ${loggedSessions} sessions, none of your weeks differs enough from the textbook to change your plan. We'll keep watching.`}
+          </p>
+        </section>
+        <section className="card">
+          <h3>Progress by week of your cycle</h3>
+          <ul className="week-progress">
+            {weeks.map((w) => (
+              <li key={w.week}>
+                <span><b>Week {w.week}</b> <small className="muted">{w.shortLabel}</small></span>
+                <div className="meter"><span style={{ width: `${Math.min(1, w.sessions / minSessions) * 100}%` }} /></div>
+                <small className="muted">{Math.min(w.sessions, minSessions)}/{minSessions}</small>
+              </li>
+            ))}
+          </ul>
+        </section>
+        {loggedSessions > 0 && (
+          <section className="card">
+            <h3>Your energy vs the textbook</h3>
+            <p className="card-sub">Average energy (1–5) by week of your cycle</p>
+            <EnergyChart weeks={weeks} highlight={null} />
+          </section>
+        )}
+      </>
     )
   }
 
