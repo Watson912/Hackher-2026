@@ -9,7 +9,7 @@ const PHASE_BLURB: Record<string, string> = {
   OVULATORY: 'Around ovulation. Typically your strongest days.',
   LUTEAL: 'Progesterone is up. Energy often dips, so volume comes down.',
   SUPPRESSED: 'Hormonal birth control keeps things steady, so your training stays consistent.',
-  UNKNOWN: 'Log your next period so we can line your plan up with your cycle.',
+  UNKNOWN: 'Log your next period to line your plan up with your cycle.',
 }
 
 export function Today() {
@@ -90,13 +90,13 @@ export function Today() {
 
       {learning && (
         <section className="card learning-card">
-          <p className="eyebrow">What we're learning</p>
+          <p className="eyebrow">What your body is showing</p>
           {learning.sessions < learning.needed ? (
             <>
               <h3>Learning your week {learning.week}</h3>
               <p className="muted">
-                {learning.sessions} of {learning.needed} sessions logged. After {learning.needed}, we start comparing your
-                week {learning.week} with the textbook.
+                {learning.sessions} of {learning.needed} sessions logged. After {learning.needed}, your week {learning.week} starts
+                shaping your plan.
               </p>
               <div className="meter" role="progressbar" aria-valuemin={0} aria-valuemax={learning.needed} aria-valuenow={learning.sessions}>
                 <span style={{ width: `${(learning.sessions / learning.needed) * 100}%` }} />

@@ -25,7 +25,7 @@ describe('learnedPattern on Maya', () => {
       completionPct: 80, confidence: 1, adjustment: -0.2,
     });
     expect(pattern[3].reason).toBe(
-      "Your energy in week 3 has averaged 2.9 vs the typical 4.0 across 10 sessions, so we've made it 20% lighter.",
+      "Your energy in week 3 has averaged 2.9 vs the typical 4.0 across 10 sessions, so you've made it 20% lighter.",
     );
   });
 
@@ -89,7 +89,7 @@ describe('learning rules', () => {
   it('adds intensity when she has more energy than the textbook expects', () => {
     const week = learnedPattern(logged(1, [5, 5, 5, 5, 4, 4]), TODAY)[1];
     expect(week.adjustment).toBe(0.2);
-    expect(week.reason).toContain('added 20% more intensity');
+    expect(week.reason).toContain("you've earned 20% more intensity");
   });
 
   it('scales down when the cycle engine is unsure of the phase', () => {

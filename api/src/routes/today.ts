@@ -133,9 +133,9 @@ todayRouter.post('/sessions/:id/log', async (req, res) => {
 
     if (now.sessions < rules.learning.minSessions) {
       const left = rules.learning.minSessions - now.sessions;
-      feedback = `Logged. ${left} more week-${week} session${left === 1 ? '' : 's'} and we'll start learning your week ${week}.`;
+      feedback = `Logged. ${left} more week-${week} session${left === 1 ? '' : 's'} and your week ${week} starts shaping your plan.`;
     } else if (planChanged && now.adjustment !== 0) {
-      feedback = `Logged. We've updated your plan: week ${week} is now ${change} than the textbook.`;
+      feedback = `Logged. You've just changed your plan: week ${week} is now ${change} than the textbook.`;
     } else if (now.adjustment !== 0) {
       feedback = `Logged. That's ${now.sessions} week-${week} sessions, and it still points the same way: week ${week} stays ${change}.`;
     } else {

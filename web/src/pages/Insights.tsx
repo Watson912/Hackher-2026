@@ -30,7 +30,7 @@ export function Insights() {
         <h2>Consistent training, by design</h2>
         <p className="muted">
           On hormonal birth control there are no natural phases to learn from, so your plan stays steady week to week.
-          We still track your energy and effort so you can see how your training is going.
+          Your energy and effort logs still show you how your training is going.
         </p>
       </section>
     )
@@ -41,12 +41,12 @@ export function Insights() {
     return (
       <>
         <section className="hero">
-          <p className="eyebrow">What we've learned so far</p>
+          <p className="eyebrow">What your body has shown so far</p>
           <h2>{ready.length === 0 ? 'Still learning your cycle' : 'So far, you match the textbook'}</h2>
           <p className="muted">
             {ready.length === 0
-              ? `We compare each week of your cycle with the textbook once you've logged ${minSessions} sessions in it. Every log gets us closer.`
-              : `Across ${loggedSessions} sessions, none of your weeks differs enough from the textbook to change your plan. We'll keep watching.`}
+              ? `Once you've logged ${minSessions} sessions in a week of your cycle, that week starts shaping your plan. Every log counts.`
+              : `Across ${loggedSessions} sessions, your weeks line up with the textbook, so your plan follows it. Keep logging and it will follow you.`}
           </p>
         </section>
         <section className="card">
@@ -75,7 +75,7 @@ export function Insights() {
   return (
     <>
       <section className="hero">
-        <p className="eyebrow">What we learned</p>
+        <p className="eyebrow">What your body showed</p>
         <h2>{headlineText(headline)}</h2>
         <p className="muted">
           Your energy in week {headline.week} ({headline.label.toLowerCase()}) averages{' '}
@@ -93,7 +93,7 @@ export function Insights() {
 
       {preview && nextAdjustedWeek && (
         <section className="card">
-          <p className="eyebrow">What we changed</p>
+          <p className="eyebrow">What you changed</p>
           <h3>Week {nextAdjustedWeek.week} is now {change(headline.adjustment)}</h3>
           <p className="card-sub">Your next week {nextAdjustedWeek.week} starts {longDate(nextAdjustedWeek.start)}</p>
           <PlanCompare plan={preview} />
@@ -101,9 +101,9 @@ export function Insights() {
       )}
 
       <section className="card">
-        <p className="eyebrow">How we learned it</p>
+        <p className="eyebrow">How you got here</p>
         <h3>From textbook to yours</h3>
-        <p className="card-sub">How much we've adjusted week {headline.week}, as your logs came in</p>
+        <p className="card-sub">How much your logs have adjusted week {headline.week}, one session at a time</p>
         <LearningTimeline points={timeline} week={headline.week} />
       </section>
 

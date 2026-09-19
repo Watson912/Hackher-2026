@@ -41,9 +41,9 @@ const avg = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.le
 export function describeAdjustment(p: Pick<WeekPattern, 'week' | 'avgEnergy' | 'textbookEnergy' | 'sessions' | 'adjustment'>): string | null {
   if (p.adjustment === 0 || p.avgEnergy === null) return null;
   const pct = Math.round(Math.abs(p.adjustment) * 100);
-  const change = p.adjustment < 0 ? `made it ${pct}% lighter` : `added ${pct}% more intensity`;
+  const change = p.adjustment < 0 ? `made it ${pct}% lighter` : `earned ${pct}% more intensity`;
   return `Your energy in week ${p.week} has averaged ${p.avgEnergy.toFixed(1)} vs the typical ` +
-    `${p.textbookEnergy.toFixed(1)} across ${p.sessions} sessions, so we've ${change}.`;
+    `${p.textbookEnergy.toFixed(1)} across ${p.sessions} sessions, so you've ${change}.`;
 }
 
 /**

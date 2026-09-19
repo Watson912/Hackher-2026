@@ -98,8 +98,9 @@ Produces the weekly training plan and the nutrition notes for that phase.
    enough shift visibly changes a session's intensity, not just a number.
 3. **Say why.** Every plan carries `textbook_intensity`, `personal_adjustment`
    and a one-line `adjustment_reason`, for example: "Your energy in week 3 has
-   averaged 2.9 vs the typical 4.0 across 10 sessions, so we've made this week
-   20% lighter." The personal plan is only half of what we need to show; the
+   averaged 2.9 vs the typical 4.0 across 10 sessions, so you've made it
+   20% lighter." Plan changes are always credited to her and her logs, never
+   to "we": it's her body changing the plan. The personal plan is only half of what we need to show; the
    difference from the textbook plan is the other half.
 
 An LLM can later rewrite `adjustment_reason` in friendlier language, if there's

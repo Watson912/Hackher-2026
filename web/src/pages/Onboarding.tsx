@@ -80,7 +80,7 @@ export function Onboarding({ onDone, onCancel }: { onDone: (user: CurrentUser) =
     },
     {
       title: 'Are you on birth control?',
-      subtitle: 'Hormonal birth control smooths out your natural phases, so we train you consistently instead.',
+      subtitle: 'Hormonal birth control smooths out your natural phases, so your training stays consistent instead.',
       valid: a.birthControl !== null,
       body: (
         <div className="choices two-col">
@@ -189,8 +189,8 @@ export function Onboarding({ onDone, onCancel }: { onDone: (user: CurrentUser) =
 
       {last && (
         <p className="promise">
-          We'll start with what research says about your cycle, then learn how <em>your</em> body actually responds.
-          Most people see their plan personalize within two cycles.
+          You'll start with what research says about your cycle. Then every session you log teaches your plan how{' '}
+          <em>your</em> body actually responds. Most people see their plan become their own within two cycles.
         </p>
       )}
       {error && <p className="error">{error}</p>}

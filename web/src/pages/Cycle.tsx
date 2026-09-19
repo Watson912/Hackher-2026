@@ -16,11 +16,11 @@ export function Cycle() {
   if (data.days.length === 0) {
     return (
       <section className="card">
-        <h2>{data.cycle.phase === 'SUPPRESSED' ? 'No natural phases to map' : 'We need a period date'}</h2>
+        <h2>{data.cycle.phase === 'SUPPRESSED' ? 'No natural phases to map' : 'Add your period date'}</h2>
         <p className="muted">
           {data.cycle.phase === 'SUPPRESSED'
             ? 'Hormonal birth control keeps your hormones steady, so your plan stays consistent week to week instead of following a cycle.'
-            : 'Log when your last period started and we\'ll map your whole cycle here.'}
+            : 'Log when your last period started to map your whole cycle here.'}
         </p>
       </section>
     )
@@ -37,7 +37,7 @@ export function Cycle() {
           Training load for every day of this cycle.{' '}
           {adjustedDays > 0
             ? `Your bars differ from the textbook ticks on ${adjustedDays} days: that's where your own logs changed the plan.`
-            : 'Right now your plan follows the textbook. It will shift as we learn your pattern.'}
+            : 'Right now your plan follows the textbook. It will shift as your logs reveal your pattern.'}
         </p>
       </section>
       <section className="card">
