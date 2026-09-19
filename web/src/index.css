@@ -710,3 +710,88 @@ html, body { overflow-x: clip; }
 }
 .add-list button:hover:not(:disabled) { background: var(--surface); }
 .add-list small { color: var(--muted); font-weight: 500; text-transform: capitalize; }
+
+/* =====================================================================
+   Wide screens. Phones keep the single column and bottom tab bar above;
+   tablets get a roomier column; desktops get a sidebar and per-page grids.
+   ===================================================================== */
+
+.side-nav, .landing-art { display: none; }
+
+@media (min-width: 720px) {
+  main, .topbar-row { max-width: 680px; }
+  .tabbar { width: min(560px, calc(100% - 24px)); }
+}
+
+@media (min-width: 1024px) {
+  /* ---- sidebar: the top bar becomes a fixed left column ---- */
+  .tabbar { display: none; }
+  .topbar {
+    position: fixed; inset: 0 auto 0 0; width: 248px; padding: 28px 16px 20px;
+    border-bottom: 0; border-right: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(23, 21, 31, 0.72);
+  }
+  .topbar-row { max-width: none; height: 100%; flex-direction: column; align-items: stretch; gap: 32px; }
+  .topbar .brand { font-size: 1.35rem; padding: 0 12px; }
+  .side-nav { display: grid; gap: 4px; flex: 1; align-content: start; }
+  .side-nav a {
+    display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 14px;
+    color: var(--muted); text-decoration: none; font-weight: 600; transition: color 150ms, background 150ms;
+  }
+  .side-nav a:hover:not(.active) { color: var(--text); background: var(--surface); }
+  .side-nav a.active { color: #fff; background: linear-gradient(135deg, var(--accent), var(--accent-deep)); box-shadow: var(--glow); }
+  .user-chip { padding: 10px; border-radius: 18px; background: var(--surface); border: 1px solid var(--border); }
+  .user-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* ---- content: centered next to the sidebar ---- */
+  .app-main {
+    max-width: none; margin: 0 0 0 248px; padding: 40px 48px 64px;
+    grid-template-columns: minmax(0, 1180px); justify-content: center; align-items: start; gap: 20px;
+  }
+  .app-main > .hero { grid-column: 1 / -1; }
+  .app-main .card { padding: 24px; }
+  .hero h2 { font-size: 2.6rem; }
+
+  /* Today: the workout on the left, what's next and fuel on the right. */
+  /* The last row is 1fr so the tall workout card's extra height lands
+     there, not between the cards stacked on the right. */
+  .page-today { grid-template-columns: minmax(0, 720px) minmax(0, 440px); grid-template-rows: auto auto 1fr; grid-auto-flow: row dense; }
+  .page-today > .today-card { grid-column: 1; grid-row: span 2; }
+  .page-today > .card:not(.today-card) { grid-column: 2; }
+
+  /* Plan: four weeks as a 2 x 2 grid. */
+  .page-plan { grid-template-columns: repeat(2, minmax(0, 580px)); }
+
+  /* Cycle: the words beside the wheel. */
+  .page-cycle { grid-template-columns: minmax(0, 400px) minmax(0, 620px); align-items: center; }
+  .page-cycle > .hero { grid-column: 1; }
+
+  /* Insights: the chart and what it changed, side by side. */
+  .page-insights { grid-template-columns: repeat(2, minmax(0, 580px)); }
+  .page-insights > .footnote { grid-column: 1 / -1; }
+
+  .page-settings { grid-template-columns: minmax(0, 720px); }
+
+  /* ---- landing: copy on the left, the phase ring on the right ---- */
+  main.landing-main { max-width: 1180px; padding: 48px; }
+  .landing { grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); align-items: center; gap: 64px; }
+  .landing-copy { display: grid; gap: 18px; }
+  .landing h1 { font-size: 4rem; }
+  .lede { font-size: 1.2rem; max-width: 34em; }
+  .landing-actions { grid-template-columns: repeat(auto-fit, minmax(200px, max-content)); }
+  .landing-glow { width: 520px; height: 520px; top: -80px; right: -60px; }
+  .landing-art { display: grid; justify-items: center; gap: 28px; }
+  .landing-ring {
+    width: min(420px, 100%); aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center;
+    background: conic-gradient(from 200deg, var(--phase-menstrual), var(--phase-follicular), var(--phase-ovulatory),
+      var(--phase-early_luteal), var(--phase-late_luteal), var(--phase-menstrual));
+    -webkit-mask: radial-gradient(circle, transparent 57%, #000 57.5%);
+    mask: radial-gradient(circle, transparent 57%, #000 57.5%);
+    filter: drop-shadow(0 20px 50px rgba(0, 0, 0, 0.45));
+  }
+  .landing-phases { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 18px; color: var(--muted); font-weight: 600; font-size: 0.9rem; }
+  .landing-phases li { display: inline-flex; align-items: center; gap: 8px; }
+}
+
+/* ---- onboarding: height in feet and inches ---- */
+.ob-feet-inches { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }

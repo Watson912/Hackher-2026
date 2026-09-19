@@ -24,38 +24,55 @@ export function Landing({ onStart, onSignedIn }: { onStart: () => void; onSigned
   return (
     <div className="landing">
       <div className="landing-glow" aria-hidden="true" />
-      <p className="brand"><span className="brand-mark" aria-hidden="true" />CycleSync</p>
-      <h1>Training that follows your cycle, and your data.</h1>
-      <p className="lede">
-        Fitness plans were built around men's physiology. CycleSync starts from your cycle, then learns what works
-        for <em>you</em>.
-      </p>
-
-      {/* Both paths below call an API that now requires a verified token, so
-          signing in comes first rather than failing with a 401. */}
-      <div className="landing-actions">
-        {isAuthenticated ? (
-          <>
-            <button className="btn btn-primary btn-big" onClick={onStart} disabled={loading}>Get started</button>
-            <button className="btn btn-secondary btn-big" onClick={seeDemo} disabled={loading}>
-              {loading ? 'Loading demo…' : 'See the demo'}
-            </button>
-          </>
-        ) : (
-          <button className="btn btn-primary btn-big" onClick={() => loginWithRedirect()}>
-            Log in or sign up
-          </button>
-        )}
-      </div>
-      {isAuthenticated && (
-        <p className="muted">
-          Signed in as {account?.email ?? account?.name}.{' '}
-          <button type="button" className="link" onClick={() => logout({ logoutParams: { returnTo: location.origin } })}>
-            Log out
-          </button>
+      <div className="landing-copy">
+        <p className="brand"><span className="brand-mark" aria-hidden="true" />CycleSync</p>
+        <h1>Training that follows your cycle, and your data.</h1>
+        <p className="lede">
+          Fitness plans were built around men's physiology. CycleSync starts from your cycle, then learns what works
+          for <em>you</em>.
         </p>
-      )}
-      {error && <p className="error">Couldn't load the demo: {error}</p>}
+
+        {/* Both paths below call an API that now requires a verified token, so
+            signing in comes first rather than failing with a 401. */}
+        <div className="landing-actions">
+          {isAuthenticated ? (
+            <>
+              <button className="btn btn-primary btn-big" onClick={onStart} disabled={loading}>Get started</button>
+              <button className="btn btn-secondary btn-big" onClick={seeDemo} disabled={loading}>
+                {loading ? 'Loading demo…' : 'See the demo'}
+              </button>
+            </>
+          ) : (
+            <button className="btn btn-primary btn-big" onClick={() => loginWithRedirect()}>
+              Log in or sign up
+            </button>
+          )}
+        </div>
+        {isAuthenticated && (
+          <p className="muted">
+            Signed in as {account?.email ?? account?.name}.{' '}
+            <button type="button" className="link" onClick={() => logout({ logoutParams: { returnTo: location.origin } })}>
+              Log out
+            </button>
+          </p>
+        )}
+        {error && <p className="error">Couldn't load the demo: {error}</p>}
+      </div>
+
+      {/* Wide screens only: the five phases the plan follows, as one ring. */}
+      <div className="landing-art" aria-hidden="true">
+        <div className="landing-ring" />
+        <ul className="landing-phases">
+          {PHASES.map(([key, label]) => (
+            <li key={key}><span className={`key key-phase phase-${key}`} />{label}</li>
+          ))}
+        </ul>
+      </div>
     </div>
   )
 }
+
+const PHASES = [
+  ['menstrual', 'Menstrual'], ['follicular', 'Follicular'], ['ovulatory', 'Ovulatory'],
+  ['early_luteal', 'Early luteal'], ['late_luteal', 'Late luteal'],
+] as const

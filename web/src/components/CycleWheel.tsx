@@ -7,7 +7,7 @@ import { useWidth } from '../useWidth.ts'
 // the phase; radial bars are her training load, with a gray tick where the
 // textbook plan would put it.
 const PHASES: Phase[] = ['MENSTRUAL', 'FOLLICULAR', 'OVULATORY', 'EARLY_LUTEAL', 'LATE_LUTEAL']
-const MAX_SIZE = 420
+const MAX_SIZE = 480
 const GAP_DEG = 0.8 // surface gap between phase segments, in degrees
 
 function polar(cx: number, cy: number, r: number, deg: number): [number, number] {

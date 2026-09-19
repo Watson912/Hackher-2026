@@ -73,7 +73,7 @@ function App() {
 
   if (!user) {
     return (
-      <main className="narrow">
+      <main className="narrow landing-main">
         {onboarding
           ? <Onboarding onDone={signIn} onCancel={() => setOnboarding(false)} />
           : <Landing onStart={() => setOnboarding(true)} onSignedIn={signIn} />}
@@ -81,11 +81,21 @@ function App() {
     )
   }
 
+  // The same links render twice: a sidebar on wide screens, a bottom tab bar
+  // on phones. CSS shows one or the other.
+  const sectionLinks = (Object.keys(TABS) as (keyof typeof TABS)[]).map((t) => (
+    <a key={t} href={`#${t}`} className={tab === t ? 'active' : ''} aria-current={tab === t ? 'page' : undefined}>
+      {ICONS[t]}
+      <span>{TABS[t]}</span>
+    </a>
+  ))
+
   return (
     <>
       <header className="topbar">
         <div className="topbar-row">
           <span className="brand"><span className="brand-mark" aria-hidden="true" />CycleSync</span>
+          <nav className="side-nav" aria-label="Sections">{sectionLinks}</nav>
           <span className="user-chip">
             <span className="avatar" aria-hidden="true">{user.firstName.charAt(0).toUpperCase()}</span>
             <span className="user-name">{user.firstName}</span>
@@ -100,21 +110,14 @@ function App() {
         </div>
       </header>
       {/* key: remount pages when the user changes so nothing stale shows */}
-      <main key={user.userId} className="app-main">
+      <main key={user.userId} className={`app-main page-${tab}`}>
         {tab === 'today' && <Today />}
         {tab === 'plan' && <Plan />}
         {tab === 'cycle' && <Cycle />}
         {tab === 'insights' && <Insights />}
         {tab === 'settings' && <Settings onDone={() => { location.hash = 'today' }} />}
       </main>
-      <nav className="tabbar" aria-label="Sections">
-        {(Object.keys(TABS) as (keyof typeof TABS)[]).map((t) => (
-          <a key={t} href={`#${t}`} className={tab === t ? 'active' : ''} aria-current={tab === t ? 'page' : undefined}>
-            {ICONS[t]}
-            <span>{TABS[t]}</span>
-          </a>
-        ))}
-      </nav>
+      <nav className="tabbar" aria-label="Sections">{sectionLinks}</nav>
     </>
   )
 }

@@ -104,15 +104,38 @@ const inRange = (text: string, min: number, max: number) => {
 }
 const sameSet = (a: string[], b: string[]) => a.length === b.length && a.every((x) => b.includes(x))
 
+// ---- units ----------------------------------------------------------------------
+// She types in whichever system she likes; the API always gets cm and kg.
+// The imperial limits sit just inside the API's (height 120-220 cm, weight
+// 30-250 kg) so a converted value can never be rejected.
+
+type Units = 'metric' | 'imperial'
+const KG_PER_LB = 0.45359237
+const CM_PER_IN = 2.54
+const WEIGHT_RANGE: Record<Units, [number, number]> = { metric: [30, 250], imperial: [67, 551] }
+const HEIGHT_IN_RANGE: [number, number] = [48, 86] // 4 ft to 7 ft 2 in
+const round1 = (n: number) => Math.round(n * 10) / 10
+const defaultUnits = (): Units => (navigator.language === 'en-US' ? 'imperial' : 'metric')
+
+const totalInches = (feet: string, inches: string) => Number(feet) * 12 + (inches.trim() === '' ? 0 : Number(inches))
+function heightInchesValid(feet: string, inches: string) {
+  if (!inRange(feet, 3, 7) || (inches.trim() !== '' && !inRange(inches, 0, 11.9))) return false
+  const total = totalInches(feet, inches)
+  return total >= HEIGHT_IN_RANGE[0] && total <= HEIGHT_IN_RANGE[1]
+}
+
 interface Draft {
   firstName: string
   goal: Goal | null
   experience: Experience | null
   consistency: Consistency | null
-  heightCm: string
-  weightKg: string
+  units: Units
+  heightCm: string                // metric
+  heightFt: string                // imperial
+  heightIn: string                // imperial, blank = 0
+  weight: string                  // in the chosen units
   age: string
-  goalWeightKg: string
+  goalWeight: string              // in the chosen units, optional
   equipmentTier: EquipmentTier | null
   equipment: string[] | null      // null = the tier's preset
   weekdays: number[]
@@ -154,6 +177,30 @@ function NumberField({ label, unit, value, onChange, min, max, hint, autoFocus }
       {invalid && <small className="ob-error">Enter a number from {min} to {max}.</small>}
       {hint && !invalid && <small className="ob-hint">{hint}</small>}
     </label>
+  )
+}
+
+function FeetInchesField({ feet, inches, onChange, autoFocus }: {
+  feet: string; inches: string; onChange: (patch: { heightFt?: string; heightIn?: string }) => void; autoFocus?: boolean
+}) {
+  const invalid = feet.trim() !== '' && !heightInchesValid(feet, inches)
+  return (
+    <div className="ob-field">
+      <span>Height</span>
+      <span className="ob-feet-inches">
+        <span className="ob-input-unit">
+          <input type="number" inputMode="numeric" min={3} max={7} value={feet} aria-label="Height, feet" aria-invalid={invalid}
+            autoFocus={autoFocus} onChange={(e) => onChange({ heightFt: e.target.value })} />
+          <span>ft</span>
+        </span>
+        <span className="ob-input-unit">
+          <input type="number" inputMode="decimal" min={0} max={11} value={inches} aria-label="Height, inches" aria-invalid={invalid}
+            onChange={(e) => onChange({ heightIn: e.target.value })} />
+          <span>in</span>
+        </span>
+      </span>
+      {invalid && <small className="ob-error">Enter a height from 4 ft to 7 ft 2 in.</small>}
+    </div>
   )
 }
 
@@ -218,7 +265,7 @@ export function Onboarding({ onDone, onCancel }: { onDone: (user: CurrentUser) =
   const [options, setOptions] = useState<EquipmentOptions | null>(null)
   const [a, setA] = useState<Draft>({
     firstName: '', goal: null, experience: null, consistency: null,
-    heightCm: '', weightKg: '', age: '', goalWeightKg: '',
+    units: defaultUnits(), heightCm: '', heightFt: '', heightIn: '', weight: '', age: '', goalWeight: '',
     equipmentTier: null, equipment: null, weekdays: [],
     birthControl: null, lastPeriodStart: null, cycleLength: 28, regularity: 'REGULAR',
   })
@@ -235,8 +282,34 @@ export function Onboarding({ onDone, onCancel }: { onDone: (user: CurrentUser) =
   const preset = (tier: EquipmentTier | null) => (options && tier ? options.presets[tier] : [])
   const ticked = a.equipment ?? preset(a.equipmentTier)
   const next = () => setStep((s) => s + 1)
-  // Picking a single answer moves on by itself, like the reference design.
-  const choose = (patch: Partial<Draft>) => { set(patch); window.setTimeout(next, 180) }
+
+  // Switching units converts whatever she already typed, so nothing is lost.
+  function switchUnits(units: Units) {
+    if (units === a.units) return
+    const num = (s: string) => (s.trim() === '' || !Number.isFinite(Number(s)) ? null : Number(s))
+    const weight = (s: string) => {
+      const n = num(s)
+      if (n === null) return s
+      return String(units === 'imperial' ? Math.round(n / KG_PER_LB) : round1(n * KG_PER_LB))
+    }
+    const patch: Partial<Draft> = { units, weight: weight(a.weight), goalWeight: weight(a.goalWeight) }
+    if (units === 'imperial') {
+      const cm = num(a.heightCm)
+      if (cm !== null) {
+        let ft = Math.floor(cm / CM_PER_IN / 12)
+        let inch = Math.round(cm / CM_PER_IN - ft * 12)
+        if (inch === 12) { ft += 1; inch = 0 }
+        Object.assign(patch, { heightFt: String(ft), heightIn: String(inch) })
+      }
+    } else if (num(a.heightFt) !== null) {
+      patch.heightCm = String(Math.round(totalInches(a.heightFt, a.heightIn) * CM_PER_IN))
+    }
+    set(patch)
+  }
+  const imperial = a.units === 'imperial'
+  const toKg = (s: string) => (s.trim() === '' ? null : imperial ? round1(Number(s) * KG_PER_LB) : Number(s))
+  const [weightMin, weightMax] = WEIGHT_RANGE[a.units]
+  const weightUnit = imperial ? 'lb' : 'kg'
 
   const steps: Step[] = [
     {
@@ -260,7 +333,7 @@ export function Onboarding({ onDone, onCancel }: { onDone: (user: CurrentUser) =
       body: (
         <div role="radiogroup" aria-label="Top fitness goal">
           {GOALS.map((g) => (
-            <Row key={g.value} selected={a.goal === g.value} icon={ICONS[g.value]} onClick={() => choose({ goal: g.value })}>
+            <Row key={g.value} selected={a.goal === g.value} icon={ICONS[g.value]} onClick={() => set({ goal: g.value })}>
               <b>{g.label}</b><small>{g.hint}</small>
             </Row>
           ))}
@@ -275,7 +348,7 @@ export function Onboarding({ onDone, onCancel }: { onDone: (user: CurrentUser) =
       body: (
         <div role="radiogroup" aria-label="Strength training experience">
           {EXPERIENCE.map((x) => (
-            <Row key={x.value} selected={a.experience === x.value} onClick={() => choose({ experience: x.value })}>
+            <Row key={x.value} selected={a.experience === x.value} onClick={() => set({ experience: x.value })}>
               <b>{x.label}</b>
             </Row>
           ))}
@@ -290,7 +363,7 @@ export function Onboarding({ onDone, onCancel }: { onDone: (user: CurrentUser) =
       body: (
         <div role="radiogroup" aria-label="Consistency">
           {CONSISTENCY.map((x) => (
-            <Row key={x.value} selected={a.consistency === x.value} onClick={() => choose({ consistency: x.value })}>
+            <Row key={x.value} selected={a.consistency === x.value} onClick={() => set({ consistency: x.value })}>
               <b>{x.label}</b>
             </Row>
           ))}
@@ -300,16 +373,28 @@ export function Onboarding({ onDone, onCancel }: { onDone: (user: CurrentUser) =
     {
       header: 'Body stats',
       question: 'A few body stats',
-      valid: inRange(a.heightCm, 120, 220) && inRange(a.weightKg, 30, 250) && inRange(a.age, 13, 90)
-        && (a.goalWeightKg.trim() === '' || inRange(a.goalWeightKg, 30, 250)),
+      valid: (imperial ? heightInchesValid(a.heightFt, a.heightIn) : inRange(a.heightCm, 120, 220))
+        && inRange(a.weight, weightMin, weightMax) && inRange(a.age, 13, 90)
+        && (a.goalWeight.trim() === '' || inRange(a.goalWeight, weightMin, weightMax)),
       body: (
-        <div className="ob-stats">
-          <NumberField label="Height" unit="cm" value={a.heightCm} onChange={(v) => set({ heightCm: v })} min={120} max={220} autoFocus />
-          <NumberField label="Weight" unit="kg" value={a.weightKg} onChange={(v) => set({ weightKg: v })} min={30} max={250} />
-          <NumberField label="Age" unit="years" value={a.age} onChange={(v) => set({ age: v })} min={13} max={90} />
-          <NumberField label="Goal weight (optional)" unit="kg" value={a.goalWeightKg} onChange={(v) => set({ goalWeightKg: v })}
-            min={30} max={250} />
-        </div>
+        <>
+          <div className="ob-segmented" role="radiogroup" aria-label="Units">
+            {([['imperial', 'ft · lb'], ['metric', 'cm · kg']] as const).map(([u, label]) => (
+              <button key={u} type="button" role="radio" aria-checked={a.units === u}
+                className={a.units === u ? 'selected' : ''} onClick={() => switchUnits(u)}>{label}</button>
+            ))}
+          </div>
+          <div className="ob-stats">
+            {imperial
+              ? <FeetInchesField feet={a.heightFt} inches={a.heightIn} onChange={set} autoFocus />
+              : <NumberField label="Height" unit="cm" value={a.heightCm} onChange={(v) => set({ heightCm: v })} min={120} max={220} autoFocus />}
+            <NumberField label="Weight" unit={weightUnit} value={a.weight} onChange={(v) => set({ weight: v })}
+              min={weightMin} max={weightMax} />
+            <NumberField label="Age" unit="years" value={a.age} onChange={(v) => set({ age: v })} min={13} max={90} />
+            <NumberField label="Goal weight (optional)" unit={weightUnit} value={a.goalWeight} onChange={(v) => set({ goalWeight: v })}
+              min={weightMin} max={weightMax} />
+          </div>
+        </>
       ),
     },
     {
@@ -321,7 +406,7 @@ export function Onboarding({ onDone, onCancel }: { onDone: (user: CurrentUser) =
         <div role="radiogroup" aria-label="Where you train">
           {TIERS.map((t) => (
             <Row key={t.value} selected={a.equipmentTier === t.value}
-              onClick={() => choose({ equipmentTier: t.value, equipment: null })}>
+              onClick={() => set({ equipmentTier: t.value, equipment: null })}>
               <b>{t.label}</b><small>{t.hint}</small>
             </Row>
           ))}
@@ -362,7 +447,7 @@ export function Onboarding({ onDone, onCancel }: { onDone: (user: CurrentUser) =
       body: (
         <div role="radiogroup" aria-label="Birth control">
           {BIRTH_CONTROL.map((b) => (
-            <Row key={b.value} selected={a.birthControl === b.value} onClick={() => choose({ birthControl: b.value })}>
+            <Row key={b.value} selected={a.birthControl === b.value} onClick={() => set({ birthControl: b.value })}>
               <b>{b.label}</b>
             </Row>
           ))}
@@ -431,10 +516,10 @@ export function Onboarding({ onDone, onCancel }: { onDone: (user: CurrentUser) =
         goal: a.goal ?? 'GENERAL_FITNESS',
         experience: a.experience ?? 'NEW',
         consistency: a.consistency,
-        heightCm: Number(a.heightCm),
-        weightKg: Number(a.weightKg),
+        heightCm: imperial ? round1(totalInches(a.heightFt, a.heightIn) * CM_PER_IN) : Number(a.heightCm),
+        weightKg: toKg(a.weight)!,
         age: Number(a.age),
-        goalWeightKg: a.goalWeightKg.trim() === '' ? null : Number(a.goalWeightKg),
+        goalWeightKg: toKg(a.goalWeight),
         equipmentTier: tier,
         equipment: a.equipment && !sameSet(a.equipment, preset(tier)) ? a.equipment : null,
         daysPerWeek: a.weekdays.length || 3,
