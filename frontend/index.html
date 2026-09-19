@@ -7,18 +7,24 @@
 
     <title>HerBalance</title>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,340;0,9..144,500;0,9..144,600;1,9..144,500&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
+<div class="bg-mesh" aria-hidden="true"></div>
+
 <nav>
     <div class="logo">
-        🌷 HerBalance
+        <span class="logo-mark">🌷</span> HerBalance
     </div>
 
     <div class="nav-links">
-        <a href="#">Today</a>
+        <a href="#" class="active">Today</a>
         <a href="#">Food</a>
         <a href="#">Mood</a>
         <a href="#">Progress</a>
@@ -28,16 +34,27 @@
 
 <main>
 
+<div class="layout">
+
+<div class="main-col">
+
     <section class="welcome">
 
-        <p class="date">YOUR WELLNESS SPACE</p>
+        <div class="welcome-text">
+            <p class="date">YOUR WELLNESS SPACE</p>
 
-        <h1>Good morning ♡</h1>
+            <h1>Good morning<span class="accent-mark">♡</span></h1>
 
-        <p>
-            Nourish your body, understand your mind,
-            and celebrate the little wins.
-        </p>
+            <p class="lede">
+                Nourish your body, understand your mind,
+                and celebrate the little wins.
+            </p>
+        </div>
+
+        <div class="welcome-ring" aria-hidden="true">
+            <div class="ring-shape"></div>
+            <div class="ring-shape ring-shape--inner"></div>
+        </div>
 
     </section>
 
@@ -46,29 +63,118 @@
 
         <div class="card calories">
 
-            <span class="icon">🍓</span>
+            <span class="icon-ring" style="--pct: 0"><span class="icon">🍓</span></span>
 
-            <div>
-                <p>Today's calories</p>
+            <div class="card-body">
+                <div class="card-label-row">
+                    <p class="card-label">Today's calories</p>
+                    <span class="pill pill--rose">Just started</span>
+                </div>
                 <h2>0 <span>/ 1,800 kcal</span></h2>
+                <div class="progress-track"><div class="progress-fill" style="width: 0%"></div></div>
             </div>
 
         </div>
 
 
-        <div class="card">
+        <div class="card mood">
 
-            <span class="icon">🌸</span>
+            <span class="icon-ring icon-ring--peach"><span class="icon">🌸</span></span>
 
-            <div>
-                <p>Today's mood</p>
+            <div class="card-body">
+                <p class="card-label">Today's mood</p>
                 <h2>How are you feeling?</h2>
+
+                <div class="mood-grid" id="moodGrid">
+                    <button type="button" class="mood-chip" data-mood="1" aria-label="Not great">😞</button>
+                    <button type="button" class="mood-chip" data-mood="2" aria-label="A little off">🙁</button>
+                    <button type="button" class="mood-chip" data-mood="3" aria-label="Okay">😐</button>
+                    <button type="button" class="mood-chip" data-mood="4" aria-label="Good">🙂</button>
+                    <button type="button" class="mood-chip" data-mood="5" aria-label="Great">😄</button>
+                </div>
+                <p class="mood-note" id="moodNote"></p>
             </div>
 
         </div>
 
     </section>
 
+
+    <!--
+        Cycle inputs, plan, and insights below are computed entirely client-side
+        (see app.js) — there is no cycle/plan API yet. Kept as a self-contained
+        block so it's easy to swap for real GET/POST calls later.
+    -->
+    <section class="card plan-card">
+
+        <div class="section-title">
+            <div>
+                <p class="small-title">PHASE-ADJUSTED</p>
+                <h2>This week's plan</h2>
+            </div>
+            <span class="phase-pill" id="phasePill"><span class="dot"></span><span id="phaseName">–</span></span>
+        </div>
+
+        <div class="plan-settings">
+            <div class="field">
+                <label for="lastPeriod">Last period start</label>
+                <input type="date" id="lastPeriod">
+            </div>
+            <div class="field">
+                <label for="cycleLength">Cycle length</label>
+                <input type="number" id="cycleLength" min="18" max="45" value="28">
+            </div>
+            <div class="field">
+                <label for="goal">Goal</label>
+                <select id="goal">
+                    <option value="strength">Strength</option>
+                    <option value="cardio">Cardio</option>
+                    <option value="general" selected>General fitness</option>
+                </select>
+            </div>
+            <div class="field">
+                <label for="daysPerWeek">Days / week</label>
+                <select id="daysPerWeek">
+                    <option value="3">3</option>
+                    <option value="4" selected>4</option>
+                    <option value="5">5</option>
+                </select>
+            </div>
+        </div>
+
+        <p class="plan-hint" id="planHint"></p>
+
+        <ul class="session-list" id="sessionList"></ul>
+
+        <div class="nutrition" id="nutritionNote"></div>
+
+    </section>
+
+
+    <section class="card insights-card">
+
+        <div class="section-title">
+            <div>
+                <p class="small-title">YOUR PATTERN</p>
+                <h2>Insights</h2>
+            </div>
+        </div>
+
+        <p class="plan-hint">Built from <span id="logCount">–</span> logged check-ins — tap a mood above to add one. A few examples are seeded so this isn't empty on day one.</p>
+
+        <div class="insight-callout">
+            <span class="mark">&ldquo;</span>
+            <p id="insightText">Log a mood a few more days to see your personal pattern.</p>
+        </div>
+
+        <div class="bars" id="phaseBars"></div>
+
+    </section>
+
+</div>
+
+
+<aside class="side-col">
 
     <section class="food-section">
 
@@ -80,7 +186,7 @@
             </div>
 
             <button onclick="loadFoods()">
-                Load Foods ♡
+                Load Foods <span class="btn-heart">♡</span>
             </button>
 
         </div>
@@ -90,6 +196,10 @@
         <div id="foodList" class="food-grid"></div>
 
     </section>
+
+</aside>
+
+</div>
 
 </main>
 
