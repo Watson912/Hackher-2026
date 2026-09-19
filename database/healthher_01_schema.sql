@@ -274,6 +274,7 @@ CREATE TABLE session_logs (
     planned_intensity       ENUM('LOW','MODERATE','HIGH') NOT NULL DEFAULT 'MODERATE',
     planned_duration_min    SMALLINT UNSIGNED,
     focus                   VARCHAR(120),
+    user_added              BOOLEAN NOT NULL DEFAULT FALSE, -- she added or changed this workout; replanning keeps it
 
     -- ---- what actually happened (three taps; only status required) ----
     status                  ENUM('PLANNED','COMPLETED','PARTIAL','SKIPPED')
@@ -358,6 +359,7 @@ CREATE TABLE planned_exercises (
     position            TINYINT UNSIGNED NOT NULL,  -- order in the session, from 1
     exercise_id         VARCHAR(64) NOT NULL,       -- exercises.json id
     swapped_from        VARCHAR(64) NULL,           -- the exercise the plan picked, if she swapped it
+    added_by_user       BOOLEAN NOT NULL DEFAULT FALSE, -- she added it herself; replanning keeps the session
 
     sets                TINYINT UNSIGNED NOT NULL,
     reps                VARCHAR(40) NOT NULL,       -- reps, a hold, or a duration

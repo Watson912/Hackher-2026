@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { post, type ExercisePlan, type LiftResult, type LoggedLift } from '../api.ts'
+import { useEffect, useState } from 'react'
+import { api, post, type ExercisePlan, type LiftResult, type LoggedLift } from '../api.ts'
 import { weekday } from '../format.ts'
 import { cr10Words } from '../scales.ts'
 import { Cr10Scale } from './Scales.tsx'
@@ -110,8 +110,8 @@ function SwapPicker({ sessionId, exercise, onSwapped, onCancel }: {
   )
 }
 
-function ExerciseRow({ index, sessionId, exercise, logged, onSwapped }: {
-  index: number; sessionId: number; exercise: ExercisePlan; logged: LoggedLift | null; onSwapped: () => void
+function ExerciseRow({ index, sessionId, exercise, logged, onSwapped, editable }: {
+  index: number; sessionId: number; exercise: ExercisePlan; logged: LoggedLift | null; onSwapped: () => void; editable: boolean
 }) {
   const [open, setOpen] = useState(false)
   const [swapping, setSwapping] = useState(false)
@@ -154,24 +154,94 @@ function ExerciseRow({ index, sessionId, exercise, logged, onSwapped }: {
           {!saved && exercise.swaps.length > 0 && (
             <button type="button" className="link" onClick={() => setSwapping(true)}>Swap</button>
           )}
+          {editable && exercise.added && (
+            <button type="button" className="link" onClick={() => remove(sessionId, exercise.exerciseId).then(onSwapped)}>Remove</button>
+          )}
         </div>
       )}
     </li>
   )
 }
 
-export function SessionExercises({ sessionId, exercises, lifts, onSwapped }: {
+const remove = (sessionId: number, exerciseId: string) => api(`/sessions/${sessionId}/exercises/${exerciseId}`, { method: 'DELETE' })
+
+interface LibraryItem { id: string; name: string; muscleGroup: string }
+
+/** Add any exercise her equipment allows, searchable. */
+function AddExercise({ sessionId, inSession, onAdded }: { sessionId: number; inSession: string[]; onAdded: () => void }) {
+  const [open, setOpen] = useState(false)
+  const [library, setLibrary] = useState<LibraryItem[] | null>(null)
+  const [query, setQuery] = useState('')
+  const [saving, setSaving] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (open && !library) api<LibraryItem[]>('/exercise-library').then(setLibrary, (e: Error) => setError(e.message))
+  }, [open, library])
+
+  async function add(id: string) {
+    setSaving(id)
+    setError(null)
+    try {
+      await post(`/sessions/${sessionId}/exercises`, { exerciseId: id })
+      setOpen(false)
+      setQuery('')
+      onAdded()
+    } catch (e) {
+      setError((e as Error).message)
+    } finally {
+      setSaving(null)
+    }
+  }
+
+  if (!open) {
+    return <button type="button" className="add-exercise" onClick={() => setOpen(true)}>+ Add exercise</button>
+  }
+
+  const q = query.trim().toLowerCase()
+  const matches = (library ?? []).filter((e) => !inSession.includes(e.id)
+    && (!q || e.name.toLowerCase().includes(q) || e.muscleGroup.includes(q)))
+
+  return (
+    <div className="add-picker">
+      <input className="add-search" autoFocus placeholder="Search exercises" value={query}
+        onChange={(e) => setQuery(e.target.value)} aria-label="Search exercises" />
+      {!library && !error && <p className="muted small">Loading…</p>}
+      <ul className="add-list">
+        {matches.slice(0, 40).map((e) => (
+          <li key={e.id}>
+            <button type="button" disabled={saving !== null} onClick={() => add(e.id)}>
+              <span>{e.name}</span>
+              <small>{saving === e.id ? 'Adding…' : e.muscleGroup.replace(/_/g, ' ')}</small>
+            </button>
+          </li>
+        ))}
+        {library && matches.length === 0 && <li className="muted small">Nothing matches "{query}".</li>}
+      </ul>
+      <button type="button" className="link" onClick={() => setOpen(false)}>Cancel</button>
+      {error && <p className="error small">{error}</p>}
+    </div>
+  )
+}
+
+export function SessionExercises({ sessionId, exercises, lifts, onSwapped, editable }: {
   sessionId: number
   exercises: ExercisePlan[]
   lifts: Record<string, LoggedLift>
-  onSwapped: () => void
+  onSwapped: () => void            // after a swap, add or remove: reload the day
+  editable: boolean                // the workout isn't logged yet
 }) {
-  if (exercises.length === 0) return null
   return (
-    <ul className="exercise-list">
-      {exercises.map((e, i) => (
-        <ExerciseRow key={e.exerciseId} index={i} sessionId={sessionId} exercise={e} logged={lifts[e.exerciseId] ?? null} onSwapped={onSwapped} />
-      ))}
-    </ul>
+    <>
+      {exercises.length > 0 && (
+        <ul className="exercise-list">
+          {exercises.map((e, i) => (
+            <ExerciseRow key={e.exerciseId} index={i} sessionId={sessionId} exercise={e} logged={lifts[e.exerciseId] ?? null}
+              onSwapped={onSwapped} editable={editable} />
+          ))}
+        </ul>
+      )}
+      {editable && <AddExercise sessionId={sessionId} inSession={exercises.map((e) => e.exerciseId)} onAdded={onSwapped} />}
+    </>
   )
 }

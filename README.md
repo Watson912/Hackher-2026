@@ -43,6 +43,11 @@ The start screen has two paths:
 **Settings** in the header changes her workout days; the plan reschedules
 around them. **Switch** goes back to the start screen.
 
+On Today she can **Change** the workout type (Squat and push, Hinge and
+pull, Full body, Cardio, Mobility), **+ Add exercise** from anything her
+equipment allows (and **Remove** what she added), or **Add a workout** on a
+rest day. Anything she changes is kept when the plan is regenerated.
+
 **Period started** (under the phase on Today) logs a new cycle whenever it
 really starts, early or late. Past her expected day with nothing logged, the
 app holds her on the last day of the cycle and shows "Period due N days ago"

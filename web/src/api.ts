@@ -128,6 +128,7 @@ export interface ExercisePlan {
   formCue: string
   swaps: { id: string; name: string }[]
   swappedFrom: { id: string; name: string } | null
+  added?: boolean                  // she added it herself
 }
 
 export interface LoggedLift {

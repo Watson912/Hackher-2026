@@ -3,7 +3,7 @@
 import { describe, expect, it } from 'vitest';
 import exercisesData from '../data/exercises.json' with { type: 'json' };
 import {
-  allowedEquipment, equipmentNotes, exercisesFor, generatePlan, generateWeek, lastLiftBefore, prescribe, prescribeFor, weekdayOf,
+  allowedEquipment, equipmentNotes, exercisesFor, generatePlan, generateWeek, lastLiftBefore, prescribe, prescribeFor, weekdayOf, buildWorkout, WORKOUT_TYPES,
   type Athlete, type Exercise, type LiftHistory, type PlanInput,
 } from './planGenerator.ts';
 import type { CycleInput } from './types.ts';
@@ -211,5 +211,20 @@ describe('her chosen training days', () => {
   it('weekdayOf reads the calendar', () => {
     expect(weekdayOf('2026-09-19')).toBe(6); // a Saturday
     expect(weekdayOf('2026-09-21')).toBe(1);
+  });
+});
+
+describe('workouts she picks herself', () => {
+  it('builds each type at the intensity it is given', () => {
+    const focus = WORKOUT_TYPES.map((t) => buildWorkout(t.id, 'high', 'STRENGTH', maya, '2026-09-19').spec.focus);
+    expect(focus.slice(0, 3)).toEqual(['Squat and push', 'Hinge and pull', 'Full body']);
+    expect(buildWorkout('cardio', 'high', 'STRENGTH', maya, '2026-09-19').spec).toMatchObject({ sessionType: 'CARDIO_HIIT', intensity: 'HIGH' });
+    expect(buildWorkout('mobility', 'high', 'STRENGTH', maya, '2026-09-19').spec.sessionType).toBe('MOBILITY');
+  });
+
+  it('only uses her equipment', () => {
+    const allowed = allowedEquipment('BODYWEIGHT')!;
+    const w = buildWorkout('full_body', 'moderate', 'GENERAL_FITNESS', { ...maya, equipmentTier: 'BODYWEIGHT' }, '2026-09-19');
+    for (const e of w.exercises) expect(exercise(e.exerciseId).equipment.every((i) => allowed.includes(i)), e.exerciseId).toBe(true);
   });
 });

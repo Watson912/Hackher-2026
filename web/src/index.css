@@ -680,3 +680,33 @@ html, body { overflow-x: clip; }
   font: inherit; font-size: 0.85rem; color: var(--text); background: var(--bg-2); border: 1px solid var(--border);
   border-radius: 14px; padding: 8px; min-width: 0;
 }
+
+/* ---- changing her own day ------------------------------------------------------------ */
+.session-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.type-picker { display: grid; gap: 8px; width: 100%; margin-top: 6px; }
+.type-options { display: flex; flex-wrap: wrap; gap: 6px; }
+.type-options button {
+  font: inherit; font-size: 0.82rem; font-weight: 700; padding: 8px 12px; border-radius: 999px; cursor: pointer;
+  color: var(--text); background: var(--bg-2); border: 1px solid var(--border);
+}
+.type-options button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.type-options button.selected { background: var(--accent-soft); border-color: var(--accent); cursor: default; }
+.type-picker .link, .add-picker .link { justify-self: start; }
+.add-exercise {
+  width: 100%; margin-top: 8px; padding: 12px; border-radius: 16px; cursor: pointer; font: inherit; font-weight: 700;
+  color: var(--accent); background: transparent; border: 1.5px dashed rgba(240, 69, 122, 0.45);
+}
+.add-exercise:hover { background: var(--accent-soft); }
+.add-picker { display: grid; gap: 8px; margin-top: 8px; padding: 12px; border-radius: 16px; background: var(--bg-2); border: 1px solid var(--border); }
+.add-search {
+  font: inherit; padding: 10px 14px; border-radius: 999px; color: var(--text);
+  background: var(--surface); border: 1px solid var(--border);
+}
+.add-search:focus { outline: none; border-color: var(--accent); }
+.add-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; max-height: 260px; overflow-y: auto; }
+.add-list button {
+  width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 10px; text-align: left;
+  font: inherit; font-weight: 600; color: var(--text); background: none; border: 0; border-radius: 10px; padding: 9px 8px; cursor: pointer;
+}
+.add-list button:hover:not(:disabled) { background: var(--surface); }
+.add-list small { color: var(--muted); font-weight: 500; text-transform: capitalize; }

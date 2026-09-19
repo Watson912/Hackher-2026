@@ -157,6 +157,7 @@ export interface ExercisePlan {
   formCue: string;
   swaps: { id: string; name: string }[];      // what she can swap to with her equipment
   swappedFrom: { id: string; name: string } | null; // the exercise the plan picked, when she swapped it
+  added?: boolean;                // she added it to the session herself
 }
 
 export interface SessionSpec {
@@ -540,6 +541,29 @@ function buildSession(slot: Slot, level: PhaseIntensity, goal: Goal, athlete: At
     spec: { sessionType: 'MOBILITY', intensity: 'LOW', intensityLevel: level, durationMin: 25, focus: exercise.name },
     exercises: [plan],
   };
+}
+
+// ---- workouts she picks herself ------------------------------------------
+
+/** The workout types she can switch a day to, or add on a rest day. */
+export const WORKOUT_TYPES = [
+  { id: 'squat_push', label: 'Squat and push' },
+  { id: 'hinge_pull', label: 'Hinge and pull' },
+  { id: 'full_body', label: 'Full body' },
+  { id: 'cardio', label: 'Cardio' },
+  { id: 'mobility', label: 'Mobility' },
+] as const;
+export type WorkoutType = (typeof WORKOUT_TYPES)[number]['id'];
+
+/**
+ * One workout of the type she picked, at the given intensity, from her
+ * equipment and goal. Deterministic for a date, like the rest of the plan.
+ */
+export function buildWorkout(type: WorkoutType, level: PhaseIntensity, goal: Goal, athlete: Athlete, date: IsoDate): SessionBuild {
+  const seed = Math.max(0, daysBetween('2020-01-01', date));
+  const strengthDay = ['squat_push', 'hinge_pull', 'full_body'].indexOf(type);
+  if (strengthDay >= 0) return buildSession('STRENGTH', level, goal, athlete, strengthDay + STRENGTH_DAYS.length * seed, date);
+  return buildSession(type === 'cardio' ? 'CARDIO' : 'MOBILITY', level, goal, athlete, seed, date);
 }
 
 const resolveCitations = (keys: string[] | undefined): Reference[] =>

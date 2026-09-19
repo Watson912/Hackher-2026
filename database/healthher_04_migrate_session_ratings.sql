@@ -29,6 +29,10 @@ ALTER TABLE cycle_profiles
 ALTER TABLE cycle_profiles
     ADD COLUMN training_weekdays VARCHAR(13) NULL AFTER training_days_per_week;
 
+-- ---- workouts and exercises she adds herself ----------------------------
+ALTER TABLE session_logs
+    ADD COLUMN user_added BOOLEAN NOT NULL DEFAULT FALSE AFTER focus;
+
 -- ---- new tables (same definitions as healthher_01_schema.sql) ----------
 CREATE TABLE IF NOT EXISTS planned_exercises (
     planned_exercise_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -37,6 +41,7 @@ CREATE TABLE IF NOT EXISTS planned_exercises (
     position            TINYINT UNSIGNED NOT NULL,
     exercise_id         VARCHAR(64) NOT NULL,
     swapped_from        VARCHAR(64) NULL,
+    added_by_user       BOOLEAN NOT NULL DEFAULT FALSE,
     sets                TINYINT UNSIGNED NOT NULL,
     reps                VARCHAR(40) NOT NULL,
     target_rpe          TINYINT UNSIGNED NOT NULL,

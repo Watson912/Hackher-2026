@@ -4,6 +4,7 @@ import { FuelCard } from '../components/FuelCard.tsx'
 import { InfoHeading } from '../components/InfoHeading.tsx'
 import { LogSession } from '../components/LogSession.tsx'
 import { PeriodLogger } from '../components/PeriodLogger.tsx'
+import { WorkoutTypePicker } from '../components/WorkoutTypePicker.tsx'
 import { SessionExercises } from '../components/SessionExercises.tsx'
 import { change, longDate, phaseLabel, titleCase, weekday } from '../format.ts'
 
@@ -76,6 +77,7 @@ export function Today() {
           <>
             <h3>Rest day</h3>
             <p className="muted">A walk or some mobility is plenty.</p>
+            <div className="hero-action"><WorkoutTypePicker sessionId={null} label="Add a workout" onDone={load} /></div>
           </>
         )}
         {session && (
@@ -85,19 +87,23 @@ export function Today() {
                 <InfoHeading title={session.focus} label="today's workout">
                   <p>Built from your answers and where you are in your cycle. Tap <b>Swap</b> to change an exercise.</p>
                 </InfoHeading>
-                <p className="session-meta">
+                <div className="session-meta">
                   <span className="chip">
                     <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
                     {session.durationMin} min
                   </span>
-                </p>
+                  {!logged && Object.keys(session.lifts).length === 0 && (
+                    <WorkoutTypePicker sessionId={session.id} current={session.focus} label="Change" onDone={load} />
+                  )}
+                </div>
               </div>
               <span className={`pill pill-${session.intensity.toLowerCase()}`}>{titleCase(session.intensity)}</span>
             </div>
 
             {session.textbook && <p className="adjusted-note">Lighter than usual, based on your logs.</p>}
 
-            <SessionExercises key={session.id} sessionId={session.id} exercises={session.exercises} lifts={session.lifts} onSwapped={load} />
+            <SessionExercises key={session.id} sessionId={session.id} exercises={session.exercises} lifts={session.lifts}
+              onSwapped={load} editable={!logged} />
             {data.equipmentNotes.map((note) => <p key={note} className="muted small equipment-note">{note}</p>)}
 
             {!logged && <LogSession sessionId={session.id} plannedMin={session.durationMin} onLogged={onLogged} />}

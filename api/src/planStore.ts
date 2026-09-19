@@ -15,10 +15,10 @@ export async function saveRoutine(conn: PoolConnection, userId: number, sessionI
   for (const [i, e] of exercises.entries()) {
     await conn.query(
       `INSERT INTO planned_exercises
-         (user_id, session_log_id, position, exercise_id, swapped_from, sets, reps, target_rpe, rest_sec,
+         (user_id, session_log_id, position, exercise_id, swapped_from, added_by_user, sets, reps, target_rpe, rest_sec,
           load_kg, load_text, load_reason, load_pct, prescription_json)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [userId, sessionId, i + 1, e.exerciseId, e.swappedFrom?.id ?? null, e.sets, e.reps, e.rpe, e.restSec,
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [userId, sessionId, i + 1, e.exerciseId, e.swappedFrom?.id ?? null, e.added ?? false, e.sets, e.reps, e.rpe, e.restSec,
         e.loadKg, e.load.slice(0, 160), e.loadReason?.slice(0, 255) ?? null, e.loadPct, JSON.stringify(e)],
     );
   }
@@ -41,11 +41,12 @@ export async function refreshUpcomingPlan(ctx: UserContext): Promise<WeekPlan[]>
   try {
     await conn.beginTransaction();
 
-    // Days she has already logged (the session, or any lift in it) keep
-    // their log; everything else planned from today on is regenerated.
+    // Days she has already logged (the session, or any lift in it), or
+    // changed herself (added a workout or exercises, or switched the type),
+    // keep what they have; everything else planned from today on is regenerated.
     await conn.query(
       `DELETE FROM session_logs
-       WHERE user_id = ? AND status = 'PLANNED' AND session_date >= ?
+       WHERE user_id = ? AND status = 'PLANNED' AND session_date >= ? AND user_added = FALSE
          AND session_log_id NOT IN (SELECT session_log_id FROM exercise_logs WHERE user_id = ?)`,
       [userId, today, userId],
     );

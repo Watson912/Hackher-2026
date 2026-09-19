@@ -1,10 +1,11 @@
 import { Router } from 'express';
-import type { ResultSetHeader, RowDataPacket } from 'mysql2';
-import { cycleWeekOf } from '../core/cycleEngine.ts';
+import type { PoolConnection, ResultSetHeader, RowDataPacket } from 'mysql2/promise';
+import { cycleWeekOf, dayInfo } from '../core/cycleEngine.ts';
 import { sessionLoad, WEEKS, type LearnedPattern } from '../core/learning.ts';
 import { computeNutrition } from '../core/nutrition.ts';
 import {
-  equipmentNotes, exerciseById, prescribeFor, type ExercisePlan, type PlannedSession,
+  buildWorkout, equipmentNotes, exerciseById, exercisesFor, prescribeFor, shiftLevel, WORKOUT_TYPES,
+  type ExercisePlan, type PlannedSession, type WorkoutType,
 } from '../core/planGenerator.ts';
 import rules from '../core/rules.json' with { type: 'json' };
 import type { CycleWeek, PhaseIntensity } from '../core/types.ts';
@@ -294,7 +295,7 @@ todayRouter.post('/sessions/:id/exercises/:exerciseId/swap', async (req, res) =>
     // This session: re-prescribe the slot at the session's intensity.
     const level = ((await plannedSession(session))?.intensityLevel ?? 'moderate') as PhaseIntensity;
     const taken = new Set(routine.filter((e) => e !== current).map((e) => e.exerciseId));
-    const replacement = prescribeFor(exerciseById(original)!, level, { ...ctx.athlete, swaps }, session.date, taken);
+    const replacement = { ...prescribeFor(exerciseById(original)!, level, { ...ctx.athlete, swaps }, session.date, taken), added: current.added };
     await saveRoutine(conn, userId, session.id, routine.map((e) => (e === current ? replacement : e)));
     await conn.commit();
   } catch (err) {
@@ -307,4 +308,162 @@ todayRouter.post('/sessions/:id/exercises/:exerciseId/swap', async (req, res) =>
   // Replan: the generator applies her remembered swap to every future session.
   await refreshUpcomingPlan(await loadUser(userId));
   res.json({ ok: true, swappedTo: exerciseById(to)?.name ?? to, remembered: to !== original });
+});
+
+// ---- changing her own day --------------------------------------------------
+// She can add exercises, remove ones she added, switch the workout type, or
+// add a workout on a rest day. Any of these marks the session as hers
+// (user_added), so replanning keeps it.
+
+/** The intensity for a day: the plan's if it planned one, else her phase's, with her learning applied. */
+async function levelFor(ctx: UserContext, session: SessionRow | null, date: string): Promise<PhaseIntensity> {
+  const planned = session ? await plannedSession(session) : null;
+  if (planned?.intensityLevel) return planned.intensityLevel;
+  const info = dayInfo(ctx.cycleInput, date);
+  if (!info) return 'moderate';
+  return learns(ctx) ? shiftLevel(info.phaseIntensity, ctx.pattern[info.week].adjustment) : info.phaseIntensity;
+}
+
+const isWorkoutType = (t: unknown): t is WorkoutType => WORKOUT_TYPES.some((w) => w.id === t);
+
+/** Run a set of writes in one transaction. */
+async function inTransaction(work: (conn: PoolConnection) => Promise<void>) {
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
+    await work(conn);
+    await conn.commit();
+  } catch (err) {
+    await conn.rollback();
+    throw err;
+  } finally {
+    conn.release();
+  }
+}
+
+/** Everything her equipment allows, for the "Add exercise" picker. */
+todayRouter.get('/exercise-library', async (_req, res) => {
+  const ctx = await loadUser(res.locals.userId);
+  res.json(exercisesFor(ctx.athlete.equipmentTier, ctx.athlete.equipment)
+    .map((e) => ({ id: e.id, name: e.name, muscleGroup: e.muscleGroup, category: e.category }))
+    .sort((a, b) => a.name.localeCompare(b.name)));
+});
+
+todayRouter.post('/sessions/:id/exercises', async (req, res) => {
+  const { exerciseId } = req.body as { exerciseId?: string };
+  const userId: number = res.locals.userId;
+  const session = await findSession(req.params.id, userId);
+  if (!session) {
+    res.status(404).json({ error: 'Session not found' });
+    return;
+  }
+  if (session.status !== 'PLANNED') {
+    res.status(409).json({ error: "You've already logged this workout." });
+    return;
+  }
+  const ctx = await loadUser(userId);
+  const exercise = typeof exerciseId === 'string' ? exerciseById(exerciseId) : null;
+  if (!exercise || !exercisesFor(ctx.athlete.equipmentTier, ctx.athlete.equipment).includes(exercise)) {
+    res.status(400).json({ error: "That exercise isn't available with your equipment" });
+    return;
+  }
+  const routine = await routineFor(session);
+  if (routine.some((e) => e.exerciseId === exercise.id)) {
+    res.status(409).json({ error: `${exercise.name} is already in this workout` });
+    return;
+  }
+  const level = await levelFor(ctx, session, session.date);
+  // She picked this exercise, so don't swap it for a remembered preference.
+  const taken = new Set(routine.map((e) => e.exerciseId));
+  const plan: ExercisePlan = { ...prescribeFor(exercise, level, { ...ctx.athlete, swaps: {} }, session.date, taken), added: true };
+  await inTransaction(async (conn) => {
+    await saveRoutine(conn, userId, session.id, [...routine, plan]);
+    await conn.query('UPDATE session_logs SET user_added = TRUE WHERE session_log_id = ?', [session.id]);
+  });
+  res.status(201).json({ added: plan });
+});
+
+todayRouter.delete('/sessions/:id/exercises/:exerciseId', async (req, res) => {
+  const userId: number = res.locals.userId;
+  const session = await findSession(req.params.id, userId);
+  if (!session) {
+    res.status(404).json({ error: 'Session not found' });
+    return;
+  }
+  const routine = await routineFor(session);
+  const target = routine.find((e) => e.exerciseId === req.params.exerciseId);
+  if (!target?.added) {
+    res.status(400).json({ error: 'Only exercises you added can be removed' });
+    return;
+  }
+  await inTransaction(async (conn) => {
+    await conn.query('DELETE FROM exercise_logs WHERE session_log_id = ? AND exercise_id = ?', [session.id, target.exerciseId]);
+    await saveRoutine(conn, userId, session.id, routine.filter((e) => e !== target));
+  });
+  res.json({ removed: target.exerciseId });
+});
+
+/** Switch a planned workout to another type (e.g. strength to cardio), same intensity. */
+todayRouter.post('/sessions/:id/type', async (req, res) => {
+  const { type } = req.body as { type?: unknown };
+  if (!isWorkoutType(type)) {
+    res.status(400).json({ error: `type must be one of ${WORKOUT_TYPES.map((w) => w.id).join(', ')}` });
+    return;
+  }
+  const userId: number = res.locals.userId;
+  const session = await findSession(req.params.id, userId);
+  if (!session) {
+    res.status(404).json({ error: 'Session not found' });
+    return;
+  }
+  const [lifts] = await pool.query<RowDataPacket[]>('SELECT 1 FROM exercise_logs WHERE session_log_id = ? LIMIT 1', [session.id]);
+  if (session.status !== 'PLANNED' || lifts.length) {
+    res.status(409).json({ error: "You've already logged part of this workout." });
+    return;
+  }
+  const ctx = await loadUser(userId);
+  const workout = buildWorkout(type, await levelFor(ctx, session, session.date), ctx.goal, ctx.athlete, session.date);
+  await inTransaction(async (conn) => {
+    await conn.query(
+      `UPDATE session_logs SET session_type = ?, planned_intensity = ?, planned_duration_min = ?, focus = ?, user_added = TRUE
+       WHERE session_log_id = ?`,
+      [workout.spec.sessionType, workout.spec.intensity, workout.spec.durationMin, workout.spec.focus, session.id],
+    );
+    await saveRoutine(conn, userId, session.id, workout.exercises);
+  });
+  res.json({ focus: workout.spec.focus });
+});
+
+/** A workout on a rest day: today. */
+todayRouter.post('/workouts', async (req, res) => {
+  const { type } = req.body as { type?: unknown };
+  if (!isWorkoutType(type)) {
+    res.status(400).json({ error: `type must be one of ${WORKOUT_TYPES.map((w) => w.id).join(', ')}` });
+    return;
+  }
+  const userId: number = res.locals.userId;
+  const ctx = await loadUser(userId);
+  const date = ctx.today;
+  const [existing] = await pool.query<RowDataPacket[]>(
+    'SELECT session_log_id FROM session_logs WHERE user_id = ? AND session_date = ?', [userId, date],
+  );
+  if (existing.length) {
+    res.status(409).json({ error: 'You already have a workout today' });
+    return;
+  }
+  const info = dayInfo(ctx.cycleInput, date);
+  const workout = buildWorkout(type, await levelFor(ctx, null, date), ctx.goal, ctx.athlete, date);
+  let sessionId = 0;
+  await inTransaction(async (conn) => {
+    const [row] = await conn.query<ResultSetHeader>(
+      `INSERT INTO session_logs
+         (user_id, session_date, cycle_day, phase, session_type, planned_intensity, planned_duration_min, focus, status, user_added)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'PLANNED', TRUE)`,
+      [userId, date, info?.day ?? null, info?.phase ?? ctx.cycle.phase, workout.spec.sessionType, workout.spec.intensity,
+        workout.spec.durationMin, workout.spec.focus],
+    );
+    sessionId = row.insertId;
+    await saveRoutine(conn, userId, sessionId, workout.exercises);
+  });
+  res.status(201).json({ sessionId, focus: workout.spec.focus });
 });
