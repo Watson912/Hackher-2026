@@ -22,3 +22,27 @@ export interface Me {
   plans: number
   sessions_logged: number
 }
+
+export type Phase = 'MENSTRUAL' | 'FOLLICULAR' | 'OVULATORY' | 'LUTEAL' | 'SUPPRESSED' | 'UNKNOWN'
+
+export interface Today {
+  today: string
+  cycle: {
+    phase: Phase
+    cycleDay: number | null
+    cycleWeek: 1 | 2 | 3 | 4 | null
+    cycleLength: number
+    ovulationDay: number | null
+    nextPeriodDate: string | null
+    late: boolean
+    confidence: number
+  }
+  days: { day: number; date: string; phase: Phase; week: 1 | 2 | 3 | 4 }[]
+  session: {
+    session_type: string
+    planned_intensity: 'LOW' | 'MODERATE' | 'HIGH'
+    planned_duration_min: number | null
+    focus: string | null
+    status: string
+  } | null
+}

@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react'
-import { api, type Me } from './api.ts'
+import { api, type Me, type Today } from './api.ts'
 
 function App() {
   const [me, setMe] = useState<Me | null>(null)
+  const [today, setToday] = useState<Today | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     api<Me>('/me').then(setMe, (e: Error) => setError(e.message))
+    api<Today>('/today').then(setToday, (e: Error) => setError(e.message))
   }, [])
 
   return (
@@ -27,6 +29,20 @@ function App() {
               <dt>Training days</dt><dd>{me.training_days_per_week} / week</dd>
               <dt>History</dt>
               <dd>{me.cycles} cycles, {me.plans} plans, {me.sessions_logged} sessions logged</dd>
+              {today && (
+                <>
+                  <dt>Today</dt>
+                  <dd>
+                    Day {today.cycle.cycleDay} of {today.cycle.cycleLength} · {today.cycle.phase.toLowerCase()} · week {today.cycle.cycleWeek}
+                  </dd>
+                  <dt>Session</dt>
+                  <dd>
+                    {today.session
+                      ? `${today.session.focus} (${today.session.planned_intensity.toLowerCase()})`
+                      : 'Rest day'}
+                  </dd>
+                </>
+              )}
             </dl>
           </>
         )}

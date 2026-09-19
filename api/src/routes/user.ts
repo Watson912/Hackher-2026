@@ -5,7 +5,7 @@ import { pool } from '../db.ts';
 export const userRouter = Router();
 
 // No auth for the hackathon: every request acts as the demo user.
-const DEMO_EMAIL = process.env.DEMO_EMAIL ?? 'demo@healthher.app';
+export const DEMO_EMAIL = process.env.DEMO_EMAIL ?? 'demo@healthher.app';
 
 userRouter.get('/me', async (_req, res) => {
   const [rows] = await pool.query<RowDataPacket[]>(

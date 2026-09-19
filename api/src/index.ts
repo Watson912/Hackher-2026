@@ -2,6 +2,7 @@ import 'dotenv/config';
 import cors from 'cors';
 import express, { type ErrorRequestHandler } from 'express';
 import { pool } from './db.ts';
+import { todayRouter } from './routes/today.ts';
 import { userRouter } from './routes/user.ts';
 
 const app = express();
@@ -14,6 +15,7 @@ app.get('/api/health', async (_req, res) => {
 });
 
 app.use('/api', userRouter);
+app.use('/api', todayRouter);
 
 const onError: ErrorRequestHandler = (err, _req, res, _next) => {
   console.error(err);

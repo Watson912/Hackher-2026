@@ -1,0 +1,60 @@
+{
+  "textbook": {
+    "description": "What research says the average cycle looks like. Energy is lowest on her period, peaks around ovulation, holds up through week 3, then dips before the next period. The learning layer compares her logs against these numbers. Keep in sync with database/README.md and healthher_03_queries.sql section 7.",
+    "weeks": {
+      "1": { "expectedEnergy": 3.0, "label": "Period week" },
+      "2": { "expectedEnergy": 4.5, "label": "Building to ovulation" },
+      "3": { "expectedEnergy": 4.0, "label": "Ovulation into early luteal" },
+      "4": { "expectedEnergy": 2.5, "label": "Late luteal" }
+    }
+  },
+
+  "phases": {
+    "MENSTRUAL": {
+      "intensityModifier": 0.80,
+      "volumeModifier": 0.75,
+      "nutrition": "Iron-rich foods (red meat, lentils, spinach) to offset menstrual losses. Anti-inflammatory fats. Do not cut calories this week."
+    },
+    "FOLLICULAR": {
+      "intensityModifier": 1.00,
+      "volumeModifier": 1.05,
+      "nutrition": "Carb tolerance is highest now. Push carbs around training and add volume to protein. Best week to attempt progressive overload."
+    },
+    "OVULATORY": {
+      "intensityModifier": 1.10,
+      "volumeModifier": 1.00,
+      "nutrition": "Peak strength window. Keep hydration and electrolytes up, ligaments are laxer so warm up longer before heavy lifts."
+    },
+    "LUTEAL": {
+      "intensityModifier": 0.90,
+      "volumeModifier": 0.90,
+      "nutrition": "Metabolism runs slightly hotter, add roughly 100-200 kcal. Magnesium and complex carbs help with cravings and sleep."
+    },
+    "SUPPRESSED": {
+      "intensityModifier": 1.00,
+      "volumeModifier": 1.00,
+      "nutrition": "Hormonal birth control keeps hormones steady, so training stays consistent week to week. Keep protein high and fuel sessions evenly."
+    },
+    "UNKNOWN": {
+      "intensityModifier": 1.00,
+      "volumeModifier": 1.00,
+      "nutrition": "Log your next period start so the plan can adapt to your cycle."
+    }
+  },
+
+  "expectedEffort": {
+    "description": "RPE (1-10) a session at this intensity should feel like.",
+    "LOW": 4,
+    "MODERATE": 6,
+    "HIGH": 8
+  },
+
+  "learning": {
+    "description": "See PLAN.md, Learning layer. Only energy moves the plan.",
+    "threshold": 0.5,
+    "slope": 0.2,
+    "maxAdjustment": 0.2,
+    "minSessions": 3,
+    "fullConfidenceSessions": 6
+  }
+}
